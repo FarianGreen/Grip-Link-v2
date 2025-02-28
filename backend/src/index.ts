@@ -1,4 +1,5 @@
 import express from "express";
+import { AppDataSource } from "./data-source";
 
 const app = express();
 app.use(express.json());
