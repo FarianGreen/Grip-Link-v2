@@ -1,38 +1,35 @@
 import { Request, Response } from "express";
+import { validationResult } from "express-validator";
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
 
 const userRepository = AppDataSource.getRepository(User);
 
 // Регистрация пользователя
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Проверяем ошибки валидации
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ errors: errors.array() });
+      return;
     }
 
     const { name, email, password } = req.body;
-
-    // Проверяем, существует ли уже пользователь
     const existingUser = await userRepository.findOne({ where: { email } });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Email уже используется" });
+      res.status(400).json({ message: "Email уже используется" });
+      return;
     }
 
-    // Хешируем пароль
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Создаём пользователя
     const newUser = userRepository.create({ name, email, passwordHash });
     await userRepository.save(newUser);
 
-    // Создаём токен
     const token = jwt.sign({ id: newUser.id }, "secret", { expiresIn: "30d" });
 
     res.status(201).json({ token, user: { id: newUser.id, name, email } });
@@ -43,18 +40,20 @@ export const register = async (req: Request, res: Response) => {
 };
 
 // Логин пользователя
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     const user = await userRepository.findOne({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: "Неверный email или пароль" });
+      res.status(400).json({ message: "Неверный email или пароль" });
+      return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Неверный email или пароль" });
+      res.status(400).json({ message: "Неверный email или пароль" });
+      return;
     }
 
     const token = jwt.sign({ id: user.id }, "secret", { expiresIn: "30d" });
@@ -67,13 +66,14 @@ export const login = async (req: Request, res: Response) => {
 };
 
 // Получение информации о себе
-export const getMe = async (req: Request, res: Response) => {
+export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.body.userId; // Получаем ID из middleware
+    const userId = req.body.userId;
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" });
+      res.status(404).json({ message: "Пользователь не найден" });
+      return;
     }
 
     res.json({ id: user.id, name: user.name, email: user.email });
