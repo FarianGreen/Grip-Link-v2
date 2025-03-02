@@ -13,4 +13,10 @@ export class User {
 
   @Column()
   passwordHash!: string;
+  
+  @Column({ nullable: true })
+  refreshToken?: string;
+
+  @Column({ type: "enum", enum: ["user", "admin"], default: "user" })
+  role!: "user" | "admin";
 }

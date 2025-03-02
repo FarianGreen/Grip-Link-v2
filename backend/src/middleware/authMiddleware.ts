@@ -27,3 +27,10 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     res.status(401).json({ message: "Неверный токен" });
   }
 };
+export const isAdmin = (req: Request, res: Response, next: NextFunction):void => {
+  if ((req as any).user.role !== "admin") {
+    res.status(403).json({ message: "Нет доступа" });
+    return 
+  }
+  next();
+};
