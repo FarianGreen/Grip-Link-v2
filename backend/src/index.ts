@@ -1,6 +1,7 @@
 import express from "express";
 import authRoutes from "./routes/authRoutes";
 import messageRoutes from "./routes/messageRoutes"
+import chatRoutes from "./routes/chatRoutes"
 import cookieParser from "cookie-parser";
 import AppDataSource from "./data-source";
 
@@ -14,7 +15,8 @@ AppDataSource.initialize()
     app.use(cookieParser());
 
     app.use("/auth", authRoutes);
-    app.use("/messages", messageRoutes);
+    app.use("/api",chatRoutes)
+    app.use("/api", messageRoutes);
 
     app.listen(5000, () => console.log("🚀 Server running on port 5000"));
   })

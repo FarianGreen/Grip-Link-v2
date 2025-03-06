@@ -1,11 +1,21 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-interface DecodedToken {
-  id: number;
+// Создаем интерфейс для расширения стандартного Request
+interface AuthRequest extends Request {
+  user?: { id: number; role: "user" | "admin" }; 
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+interface DecodedToken {
+  id: number;
+  role: "user" | "admin";
+}
+
+export const authMiddleware = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): void => {
   const token = req.header("Authorization");
 
   if (!token) {
@@ -21,16 +31,21 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     }
 
     const decoded = jwt.verify(tokenParts[1], "secret") as DecodedToken;
-    req.body.userId = decoded.id;
+    req.user = { id: decoded.id, role: decoded.role }; 
     next();
   } catch (error) {
     res.status(401).json({ message: "Неверный токен" });
   }
 };
-export const isAdmin = (req: Request, res: Response, next: NextFunction):void => {
-  if ((req as any).user.role !== "admin") {
+
+export const isAdmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (req.user?.role !== "admin") {
     res.status(403).json({ message: "Нет доступа" });
-    return 
+    return;
   }
   next();
 };
