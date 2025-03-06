@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Message } from "./Message";
 
 @Entity()
 export class User {
@@ -13,4 +14,16 @@ export class User {
 
   @Column()
   passwordHash!: string;
+
+  @Column({ nullable: true })
+  refreshToken?: string;
+
+  @Column({ type: "enum", enum: ["user", "admin"], default: "user" })
+  role!: "user" | "admin";
+
+  @OneToMany(() => Message, (message) => message.sender)
+  sentMessages!: Message[];
+
+  @OneToMany(() => Message, (message) => message.receiver)
+  receivedMessages!: Message[]; 
 }

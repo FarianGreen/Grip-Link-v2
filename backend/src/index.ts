@@ -1,20 +1,23 @@
 import express from "express";
-import { AppDataSource } from "./data-source"; 
+import authRoutes from "./routes/authRoutes";
+import messageRoutes from "./routes/messageRoutes"
+import chatRoutes from "./routes/chatRoutes"
+import cookieParser from "cookie-parser";
+import AppDataSource from "./data-source";
 
 const app = express();
 app.use(express.json());
-
 
 AppDataSource.initialize()
   .then(() => {
     console.log("✅ Connected to PostgreSQL");
 
+    app.use(cookieParser());
+
+    app.use("/auth", authRoutes);
+    app.use("/api",chatRoutes)
+    app.use("/api", messageRoutes);
+
     app.listen(5000, () => console.log("🚀 Server running on port 5000"));
   })
-  .catch((error) => {
-    console.error("❌ Database connection failed:", error);
-  });
-
-app.get("/", (req, res) => {
-  res.send("Server is running and connected to DB!");
-});
+  .catch((error) => console.error("❌ Database connection failed:", error));

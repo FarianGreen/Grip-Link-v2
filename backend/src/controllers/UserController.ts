@@ -1,41 +1,54 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
+import { validationResult } from "express-validator";
+import AppDataSource from "../data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
 
 const userRepository = AppDataSource.getRepository(User);
 
+const generateTokens = (userId: number, role?: "user" | "admin") => {
+  const accessToken = jwt.sign({ id: userId, role }, "secret", {
+    expiresIn: "15m",
+  });
+  const refreshToken = jwt.sign({ id: userId, role }, "refreshSecret", {
+    expiresIn: "30d",
+  });
+  return { accessToken, refreshToken };
+};
+
 // Регистрация пользователя
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Проверяем ошибки валидации
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      res.status(400).json({ errors: errors.array() });
+      return;
     }
 
-    const { name, email, password } = req.body;
-
-    // Проверяем, существует ли уже пользователь
+    const { name, email, password, role = "user" } = req.body;
+    if (!["user", "admin"].includes(role)) {
+      res.status(400).json({ message: "Неверная роль" });
+      return;
+    }
     const existingUser = await userRepository.findOne({ where: { email } });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Email уже используется" });
+      res.status(400).json({ message: "Email уже используется" });
+      return;
     }
 
-    // Хешируем пароль
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Создаём пользователя
-    const newUser = userRepository.create({ name, email, passwordHash });
+    const newUser = userRepository.create({ name, email, passwordHash, role });
     await userRepository.save(newUser);
 
-    // Создаём токен
-    const token = jwt.sign({ id: newUser.id }, "secret", { expiresIn: "30d" });
+    const token = jwt.sign({ id: newUser.id, role: newUser.role }, "secret", { expiresIn: "30d" });
 
-    res.status(201).json({ token, user: { id: newUser.id, name, email } });
+    res
+      .status(201)
+      .json({ token, user: { id: newUser.id, name, email, role:newUser.role } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка регистрации" });
@@ -43,37 +56,42 @@ export const register = async (req: Request, res: Response) => {
 };
 
 // Логин пользователя
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     const user = await userRepository.findOne({ where: { email } });
-    if (!user) {
-      return res.status(400).json({ message: "Неверный email или пароль" });
+
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      res.status(400).json({ message: "Неверный email или пароль" });
+      return;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: "Неверный email или пароль" });
-    }
+    const { accessToken, refreshToken } = generateTokens(user.id, user.role);
+    user.refreshToken = refreshToken;
+    await userRepository.save(user);
 
-    const token = jwt.sign({ id: user.id }, "secret", { expiresIn: "30d" });
-
-    res.json({ token, user: { id: user.id, name: user.name, email } });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+    res.json({ accessToken, user: { id: user.id, name: user.name, email } });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ message: "Ошибка при входе в систему" });
   }
 };
 
 // Получение информации о себе
-export const getMe = async (req: Request, res: Response) => {
+export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.body.userId; // Получаем ID из middleware
+    const userId = req.body.userId;
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" });
+      res.status(404).json({ message: "Пользователь не найден" });
+      return;
     }
 
     res.json({ id: user.id, name: user.name, email: user.email });
@@ -81,4 +99,60 @@ export const getMe = async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ message: "Ошибка при получении данных" });
   }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { refreshToken } = req.cookies;
+  if (!refreshToken) {
+    res.status(401).json({ message: "Нет refresh токена" });
+    return;
+  }
+
+  try {
+    const decoded: any = jwt.verify(refreshToken, "refreshSecret");
+    const user = await userRepository.findOne({
+      where: { id: decoded.id, refreshToken },
+    });
+
+    if (!user) {
+      res.status(403).json({ message: "Неверный refresh токен" });
+      return;
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(
+      user.id
+    );
+    user.refreshToken = newRefreshToken;
+    await userRepository.save(user);
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+    res.json({ accessToken });
+  } catch {
+    res.status(403).json({ message: "Ошибка refresh токена" });
+  }
+};
+
+// Выход из системы (удаление refreshToken)
+export const logout = async (req: Request, res: Response): Promise<void> => {
+  const { refreshToken } = req.cookies;
+  if (!refreshToken) {
+    res.status(401).json({ message: "Нет refresh токена" });
+    return;
+  }
+
+  const user = await userRepository.findOne({ where: { refreshToken } });
+  if (user) {
+    user.refreshToken = undefined;
+    await userRepository.save(user);
+  }
+
+  res.clearCookie("refreshToken");
+  res.json({ message: "Вы вышли из системы" });
 };
