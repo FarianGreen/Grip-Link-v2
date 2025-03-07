@@ -70,9 +70,24 @@ export const getMessages = async (
   req: AuthRequest, 
   res: Response
 ): Promise<void> => {
-  const { userId } = req.body;
-  const messages = await messageRepository.find({
-    where: [{ sender: userId }, { receiver: userId }],
-  });
-  res.json(messages);
-};
+  const { chatId } = req.params;
+
+  try{
+    const chat = await AppDataSource.getRepository(Chat).findOne({
+      where: { id: Number(chatId) },
+      relations: ["messages", "users"],
+    });
+
+    if (!chat) {
+      res.status(404).json({ message: "Чат не найден" });
+      return 
+    }
+
+    // Возвращаем все сообщения в чате
+    const messages = chat.messages;
+    res.json(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка при получении сообщений" });
+  }
+  }
