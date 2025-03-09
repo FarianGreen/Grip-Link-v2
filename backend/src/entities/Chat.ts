@@ -7,10 +7,10 @@ export class Chat {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, (user) => user.chats, { cascade: true })
   @JoinTable()
   users!: User[];
 
-  @OneToMany(() => Message, (message) => message.chat)
-  messages!: Message[]; 
+  @OneToMany(() => Message, (message) => message.chat, { cascade: true })
+  messages!: Message[];
 }
