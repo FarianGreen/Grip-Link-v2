@@ -5,13 +5,14 @@ import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
 
 interface AuthRequest extends Request {
-  user?: { id: number }; // Добавляем типизацию для пользователя
+  user?: {
+    id: number;
+    role: "user" | "admin";
+  };
 }
 
-const messageRepository = AppDataSource.getRepository(Message);
-
 export const sendMessage = async (
-  req: AuthRequest, 
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   const { content, chatId, receiverId } = req.body;
@@ -67,12 +68,12 @@ export const sendMessage = async (
 };
 
 export const getMessages = async (
-  req: AuthRequest, 
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   const { chatId } = req.params;
 
-  try{
+  try {
     const chat = await AppDataSource.getRepository(Chat).findOne({
       where: { id: Number(chatId) },
       relations: ["messages", "users"],
@@ -80,7 +81,7 @@ export const getMessages = async (
 
     if (!chat) {
       res.status(404).json({ message: "Чат не найден" });
-      return 
+      return;
     }
 
     // Возвращаем все сообщения в чате
@@ -90,4 +91,49 @@ export const getMessages = async (
     console.error(error);
     res.status(500).json({ message: "Ошибка при получении сообщений" });
   }
+};
+
+export const getChatMessages = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const chatId = parseInt(req.params.chatId);
+    const userId = req.user?.id;
+
+    if (isNaN(chatId)) {
+      res.status(400).json({ message: "Некорректный chatId" });
+      return;
+    }
+
+    const chatRepository = AppDataSource.getRepository(Chat);
+    const chat = await chatRepository.findOne({
+      where: { id: chatId },
+      relations: ["users"],
+    });
+
+    if (!chat) {
+      res.status(404).json({ message: "Чат не найден" });
+      return;
+    }
+
+    // Проверяем, состоит ли пользователь в этом чате
+    const isMember = chat.users.some((user) => user.id === userId);
+    if (!isMember) {
+      res.status(403).json({ message: "Нет доступа к этому чату" });
+      return;
+    }
+
+    // Получаем сообщения из чата
+    const messages = await AppDataSource.getRepository(Message).find({
+      where: { chat: { id: chatId } },
+      relations: ["sender", "receiver"],
+      order: { createdAt: "ASC" },
+    });
+
+    res.json(messages);
+  } catch (error) {
+    console.error("Ошибка при получении сообщений чата:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
+};
