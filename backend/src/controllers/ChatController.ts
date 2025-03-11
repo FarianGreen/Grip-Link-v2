@@ -2,13 +2,63 @@ import { Request, Response } from "express";
 import AppDataSource from "../data-source";
 import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
+import { Message } from "../entities/Message";
 
-// Определяем интерфейс для расширенного Request с `user`
+
 interface AuthRequest extends Request {
   user?: { id: number };
 }
 
-// 🔹 Создание чата (если его ещё нет)
+export const getUserChatsWithLastMessages = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ message: "Пользователь не авторизован" });
+      return;
+    }
+
+    const chats = await AppDataSource.getRepository(Chat)
+      .createQueryBuilder("chat")
+      .innerJoinAndSelect("chat.users", "user")
+      .leftJoinAndSelect(
+        (qb) =>
+          qb
+            .select("m.chatId", "chatId")
+            .addSelect("m.content", "lastMessage")
+            .addSelect("m.createdAt", "lastMessageTime")
+            .from(Message, "m")
+            .where("m.chatId = chat.id")
+            .orderBy("m.createdAt", "DESC")
+            .limit(1),
+        "lastMessage",
+        "lastMessage.chatId = chat.id"
+      )
+      .where("user.id = :userId", { userId })
+      .getMany();
+
+    const formattedChats = chats.map((chat) => ({
+      chatId: chat.id,
+      users: chat.users.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      })),
+      lastMessage: chat.messages.length > 0 ? chat.messages[0].content : null,
+      lastMessageTime:
+        chat.messages.length > 0 ? chat.messages[0].createdAt : null,
+    }));
+
+    res.json(formattedChats);
+  } catch (error) {
+    console.error("Ошибка при получении чатов:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
 export const createChat = async (
   req: AuthRequest,
   res: Response
@@ -29,12 +79,10 @@ export const createChat = async (
       return;
     }
 
-    // Добавляем текущего пользователя, если его нет в `userIds`
     if (!userIds.includes(currentUserId)) {
       userIds.push(currentUserId);
     }
 
-    // Получаем пользователей из базы данных
     const userRepo = AppDataSource.getRepository(User);
     const users = await userRepo.findByIds(userIds);
 
@@ -45,7 +93,6 @@ export const createChat = async (
       return;
     }
 
-    // Проверяем, существует ли уже чат с таким же набором пользователей
     const chatRepo = AppDataSource.getRepository(Chat);
     const existingChat = await chatRepo
       .createQueryBuilder("chat")
@@ -60,7 +107,6 @@ export const createChat = async (
       return;
     }
 
-    // Создаём новый чат
     const newChat = chatRepo.create({ users });
     await chatRepo.save(newChat);
 
@@ -71,7 +117,6 @@ export const createChat = async (
   }
 };
 
-// 🔹 Получение всех чатов пользователя
 export const getUserChats = async (
   req: AuthRequest,
   res: Response
@@ -86,7 +131,7 @@ export const getUserChats = async (
 
     const chats = await AppDataSource.getRepository(Chat).find({
       where: { users: { id: userId } },
-      relations: ["users", "messages"], // Загружаем связанные данные
+      relations: ["users", "messages"], 
     });
 
     res.json(chats);

@@ -3,7 +3,12 @@ import { validationResult } from "express-validator";
 import AppDataSource from "../data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
+
+interface CustomJwtPayload {
+  id: number;
+  refreshToken: string;
+}
 
 const userRepository = AppDataSource.getRepository(User);
 
@@ -112,7 +117,7 @@ export const refreshToken = async (
   }
 
   try {
-    const decoded: any = jwt.verify(refreshToken, "refreshSecret");
+    const decoded = jwt.verify(refreshToken, "refreshSecret") as CustomJwtPayload;
     const user = await userRepository.findOne({
       where: { id: decoded.id, refreshToken },
     });
