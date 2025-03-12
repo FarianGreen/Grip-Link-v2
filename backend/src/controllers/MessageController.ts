@@ -3,6 +3,7 @@ import AppDataSource from "../data-source";
 import { Message } from "../entities/Message";
 import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
+import { sendMessageToChatWithSocket } from "../websocket";
 
 interface AuthRequest extends Request {
   user?: {
@@ -55,6 +56,7 @@ export const getChatMessages = async (
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
+
 export const sendMessageToChat = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const chatId = parseInt(req.params.chatId);
@@ -100,6 +102,13 @@ export const sendMessageToChat = async (req: AuthRequest, res: Response): Promis
     newMessage.chat = chat;
 
     await AppDataSource.getRepository(Message).save(newMessage);
+
+    sendMessageToChatWithSocket(chatId, {
+      id: newMessage.id,
+      content: newMessage.content,
+      senderId: sender.id,
+      createdAt: newMessage.createdAt,
+  });
 
     res.status(201).json(newMessage);
   } catch (error) {

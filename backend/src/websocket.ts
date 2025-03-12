@@ -1,17 +1,28 @@
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { Message } from "./entities/Message";
 import AppDataSource from "./data-source";
+import { Message } from "./entities/Message";
 import { Chat } from "./entities/Chat";
 import { User } from "./entities/User";
 
-export interface WebSocketServer extends Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap> {}
+// 🏷️ Интерфейс данных для отправки сообщений
+interface SendMessagePayload {
+  chatId: number;
+  senderId: number;
+  receiverId: number;
+  content: string;
+}
 
-export const setupWebSocket = (server: HttpServer): WebSocketServer => {
-  const io = new Server(server, {
+// 🏷️ Интерфейс для сервера WebSocket
+let io: Server | null = null;
+
+/**
+ * Инициализация WebSocket-сервера
+ */
+export const setupWebSocket = (server: HttpServer): Server => {
+  io = new Server(server, {
     cors: {
-      origin: "*", // Разрешаем все источники (на проде лучше ограничить)
+      origin: "*", // На проде лучше ограничить
       methods: ["GET", "POST"],
     },
   });
@@ -19,15 +30,16 @@ export const setupWebSocket = (server: HttpServer): WebSocketServer => {
   io.on("connection", (socket) => {
     console.log(`✅ Пользователь подключился: ${socket.id}`);
 
-    // Получение сообщений из чата
-    socket.on("joinChat", async (chatId: number) => {
+    // 📌 Подключение к чату
+    socket.on("joinChat", (chatId: number) => {
       socket.join(`chat_${chatId}`);
-      console.log(`Пользователь ${socket.id} присоединился к чату ${chatId}`);
+      console.log(`👥 Пользователь ${socket.id} присоединился к чату ${chatId}`);
     });
 
-    // Отправка сообщений
-    socket.on("sendMessage", async ({ chatId, senderId, receiverId, content }: 
-      { chatId: number; senderId: number; receiverId: number; content: string }) => {
+    // 📌 Отправка сообщений
+    socket.on("sendMessage", async (data: SendMessagePayload) => {
+      const { chatId, senderId, receiverId, content } = data;
+
       try {
         const chatRepo = AppDataSource.getRepository(Chat);
         const userRepo = AppDataSource.getRepository(User);
@@ -55,9 +67,10 @@ export const setupWebSocket = (server: HttpServer): WebSocketServer => {
 
         await messageRepo.save(newMessage);
 
-        io.to(`chat_${chatId}`).emit("receiveMessage", newMessage);
+        // 📌 Рассылаем сообщение всем участникам чата
+        io?.to(`chat_${chatId}`).emit("receiveMessage", newMessage);
       } catch (error) {
-        console.error("Ошибка при отправке сообщения:", error);
+        console.error("❌ Ошибка при отправке сообщения:", error);
       }
     });
 
@@ -67,4 +80,13 @@ export const setupWebSocket = (server: HttpServer): WebSocketServer => {
   });
 
   return io;
+};
+
+/**
+ * 📌 Функция отправки сообщения в конкретный чат через WebSocket
+ */
+export const sendMessageToChatWithSocket = (chatId: number, message: object): void => {
+  if (io) {
+    io.to(`chat_${chatId}`).emit("newMessage", message);
+  }
 };
