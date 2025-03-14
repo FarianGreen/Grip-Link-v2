@@ -20,8 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-const PORT = process.env.PORT || 5000; // Берём порт из .env или 5000
-
+const PORT = process.env.PORT || 5000;
 AppDataSource.initialize()
   .then(() => {
     console.log("✅ Connected to PostgreSQL");

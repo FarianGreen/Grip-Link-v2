@@ -7,6 +7,7 @@ let socket: Socket;
 export const connectSocket = () => {
     socket = io(SOCKET_URL, {
         transports: ["websocket"],
+        reconnection: true,
     });
 
     socket.on("connect", () => console.log("🔗 Подключено к WebSocket"));

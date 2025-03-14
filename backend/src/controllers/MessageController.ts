@@ -103,12 +103,7 @@ export const sendMessageToChat = async (req: AuthRequest, res: Response): Promis
 
     await AppDataSource.getRepository(Message).save(newMessage);
 
-    sendMessageToChatWithSocket(chatId, {
-      id: newMessage.id,
-      content: newMessage.content,
-      senderId: sender.id,
-      createdAt: newMessage.createdAt,
-  });
+    sendMessageToChatWithSocket(chatId, newMessage);
 
     res.status(201).json(newMessage);
   } catch (error) {

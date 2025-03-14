@@ -6,10 +6,10 @@ const store = configureStore({
     reducer: {
         chat: chatReducer,
     },
-    // middleware: (getDefaultMiddleware) =>
-    //     getDefaultMiddleware({
-    //       serializableCheck: false,
-    //     }),
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+        }),
 });
 
 connectSocket();

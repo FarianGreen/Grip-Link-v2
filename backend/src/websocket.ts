@@ -9,20 +9,20 @@ import { User } from "./entities/User";
 interface SendMessagePayload {
   chatId: number;
   senderId: number;
-  receiverId: number;
   content: string;
+  receiverId?: number; // 🟢 Необязательный получатель
 }
 
-// 🏷️ Интерфейс для сервера WebSocket
+// WebSocket-сервер
 let io: Server | null = null;
 
 /**
- * Инициализация WebSocket-сервера
+ * 📌 Инициализация WebSocket-сервера
  */
-export const setupWebSocket = (server: HttpServer): Server => {
+export const setupWebSocket = (server: HttpServer): void => {
   io = new Server(server, {
     cors: {
-      origin: "*", // На проде лучше ограничить
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });
@@ -52,18 +52,25 @@ export const setupWebSocket = (server: HttpServer): Server => {
         }
 
         const sender = await userRepo.findOne({ where: { id: senderId } });
-        const receiver = await userRepo.findOne({ where: { id: receiverId } });
-
-        if (!sender || !receiver) {
-          console.log("❌ Один из пользователей не найден");
+        if (!sender) {
+          console.log("❌ Отправитель не найден");
           return;
+        }
+
+        let receiver: User | null = null;
+        if (receiverId) {
+          receiver = await userRepo.findOne({ where: { id: receiverId } });
+          if (!receiver) {
+            console.log("❌ Получатель не найден");
+            return;
+          }
         }
 
         const newMessage = new Message();
         newMessage.content = content;
         newMessage.chat = chat;
         newMessage.sender = sender;
-        newMessage.receiver = receiver;
+        if (receiver) newMessage.receiver = receiver;
 
         await messageRepo.save(newMessage);
 
@@ -78,15 +85,15 @@ export const setupWebSocket = (server: HttpServer): Server => {
       console.log(`❌ Пользователь отключился: ${socket.id}`);
     });
   });
-
-  return io;
 };
 
 /**
- * 📌 Функция отправки сообщения в конкретный чат через WebSocket
+ * 📌 Функция отправки сообщений через WebSocket
  */
-export const sendMessageToChatWithSocket = (chatId: number, message: object): void => {
-  if (io) {
-    io.to(`chat_${chatId}`).emit("newMessage", message);
+export const sendMessageToChatWithSocket = (chatId: number, message: Message): void => {
+  if (!io) {
+    console.error("❌ WebSocket сервер не инициализирован!");
+    return;
   }
+  io.to(`chat_${chatId}`).emit("newMessage", message);
 };
