@@ -34,14 +34,14 @@ const initialState: ChatState = {
 
 
 export const fetchChats = createAsyncThunk("chat/fetchChats", async () => {
-    const response = await axios.get<Chat[]>("/api/chats");
+    const response = await axios.get<Chat[]>("http://localhost:5000/api/chats");
     return response.data;
 });
 
 export const fetchMessages = createAsyncThunk(
     "chat/fetchMessages",
     async (chatId: number) => {
-        const response = await axios.get<Message[]>(`/api/messages/${chatId}`);
+        const response = await axios.get<Message[]>(`http://localhost:5000/api/messages${chatId}`);
         return response.data;
     }
 );

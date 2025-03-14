@@ -7,11 +7,11 @@ const ChatList: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const chats = useSelector((state: RootState) => state.chat.chats) || [];
     const selectedChatId = useSelector((state: RootState) => state.chat.selectedChatId);
-
+    
     useEffect(() => {
         dispatch(fetchChats()); 
     }, [dispatch]);
-
+    
     return (
         <div className="chat-list">
             <h2>Чаты</h2>
