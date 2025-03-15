@@ -21,12 +21,12 @@ const ChatList: React.FC = () => {
                 Array.isArray(chats) &&
                 chats.map((chat) => (
                     <div
-                        key={chat.id}
-                        className={`chat-item ${selectedChatId === chat.id ? "active" : ""}`}
-                        onClick={() => dispatch(setSelectedChat(chat.id))}
+                        key={chat.chatId}
+                        className={`chat-item ${selectedChatId === chat.chatId ? "active" : ""}`}
+                        onClick={() => dispatch(setSelectedChat(chat.chatId))}
                     >
                         <p>
-                            Чат #{chat.id} — {chat.users.map((u) => u.name).join(", ")}
+                            Чат #{chat.chatId} — {chat.users.map((u) => u.name).join(", ")}
                         </p>
                         {chat.lastMessage && (
                             <small>Последнее сообщение: {chat.lastMessage.content}</small>

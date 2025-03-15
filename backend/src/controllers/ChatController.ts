@@ -3,6 +3,7 @@ import AppDataSource from "../data-source";
 import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
 import { Message } from "../entities/Message";
+import { In } from "typeorm";
 
 
 interface AuthRequest extends Request {
@@ -21,36 +22,37 @@ export const getUserChatsWithLastMessages = async (
       return;
     }
 
-    const chats = await AppDataSource.getRepository(Chat)
-      .createQueryBuilder("chat")
-      .innerJoinAndSelect("chat.users", "user")
-      .leftJoinAndSelect(
-        (qb) =>
-          qb
-            .select("m.chatId", "chatId")
-            .addSelect("m.content", "lastMessage")
-            .addSelect("m.createdAt", "lastMessageTime")
-            .from(Message, "m")
-            .where("m.chatId = chat.id")
-            .orderBy("m.createdAt", "DESC")
-            .limit(1),
-        "lastMessage",
-        "lastMessage.chatId = chat.id"
-      )
-      .where("user.id = :userId", { userId })
+    const chatRepo = AppDataSource.getRepository(Chat);
+    const chats = await chatRepo.find({
+      where: { users: { id: userId } },
+      relations: ["users"],
+    });
+
+    if (!chats.length) {
+      res.json([]);
+      return;
+    }
+
+    const chatIds = chats.map(chat => chat.id);
+
+    const lastMessages = await AppDataSource.getRepository(Message)
+      .createQueryBuilder("message")
+      .where("message.chatId IN (:...chatIds)", { chatIds })
+      .orderBy("message.chatId", "ASC")
+      .addOrderBy("message.createdAt", "DESC")
+      .distinctOn(["message.chatId"])
       .getMany();
 
-    const formattedChats = chats.map((chat) => ({
-      chatId: chat.id,
-      users: chat.users.map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      })),
-      lastMessage: chat.messages.length > 0 ? chat.messages[0].content : null,
-      lastMessageTime:
-        chat.messages.length > 0 ? chat.messages[0].createdAt : null,
-    }));
+      const formattedChats = chats.map(chat => {
+        const lastMessage = lastMessages.find(msg => msg.chat?.id === chat.id);
+  
+        return {
+          chatId: chat.id,
+          users: chat.users?.map(({ id, name, email }) => ({ id, name, email })),
+          lastMessage: lastMessage?.content || null,
+          lastMessageTime: lastMessage?.createdAt || null,
+        };
+      });
 
     res.json(formattedChats);
   } catch (error) {
@@ -84,7 +86,9 @@ export const createChat = async (
     }
 
     const userRepo = AppDataSource.getRepository(User);
-    const users = await userRepo.findByIds(userIds);
+    const users = await userRepo.find({
+      where: { id: In(userIds) },
+    });
 
     if (users.length !== userIds.length) {
       res
