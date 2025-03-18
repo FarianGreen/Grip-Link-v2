@@ -1,33 +1,30 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import ChatList from "./components/ChatList";
-import ChatWindow from "./components/ChatWindow";
-import { AppDispatch, RootState } from "./store/store";
-import Login from "./pages/login/Login";
-import "./App.scss"
+import { lazy, Suspense } from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Layout } from './layout';
+import { Path } from './constants/Path';
 
 
-const App: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLogined } = useSelector((state: RootState) => state.auth);
-  useEffect(() => {
 
-  }, [dispatch, isLogined]);
+const MessagesPage = lazy(() => import('./pages/messages/Messages'));
+const RegisterForm = lazy(() => import('./pages/register/Register'));
+const LoginForm = lazy(() => import('./pages/login/Login'));
 
-  return (
-    <div className="app">
-      {isLogined ? (
-        <div className="chats-container">
-          <ChatList />
-          <div className="chat-container">
-            <ChatWindow />
-          </div>
-        </div>
-      ) : (
-        <Login />
-      )}
-    </div>
-  );
-};
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+    //   { index: true, element: <Suspense fallback={<div>Loading...</div>}><Home /></Suspense> },
+      { path: Path.messages, element: <Suspense fallback={<div>Loading...</div>}><MessagesPage /></Suspense> },
+    ],
+  },
+  { path: Path.register, element: <Suspense fallback={<div>Loading...</div>}><RegisterForm /></Suspense> },
+  { path: Path.login, element: <Suspense fallback={<div>Loading...</div>}><LoginForm /></Suspense> },
+]);
+
+function App() {
+  return <RouterProvider router={router} />;
+}
 
 export default App;
