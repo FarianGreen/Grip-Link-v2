@@ -40,12 +40,12 @@ export const fetchChats = createAsyncThunk("chat/fetchChats", async (_, { dispat
       headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
     });
     return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
       await dispatch(refreshAccessToken());
       return rejectWithValue("Токен обновлен, попробуйте снова.");
     }
-    return rejectWithValue(error.response?.data?.message || "Ошибка загрузки чатов");
+    return rejectWithValue(axios.isAxiosError(error) ? error.response?.data?.message : "Ошибка загрузки сообщений");
   }
 });
 
@@ -55,12 +55,12 @@ export const fetchMessages = createAsyncThunk("chat/fetchMessages", async (chatI
       headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
     });
     return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
       await dispatch(refreshAccessToken());
       return rejectWithValue("Токен обновлен, попробуйте снова.");
     }
-    return rejectWithValue(error.response?.data?.message || "Ошибка загрузки сообщений");
+    return rejectWithValue(axios.isAxiosError(error) ? error.response?.data?.message : "Ошибка загрузки сообщений");
   }
 });
 

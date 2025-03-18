@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import ChatList from "./components/ChatList";
 import ChatWindow from "./components/ChatWindow";
 import { AppDispatch, RootState } from "./store/store";
-import Login from "./components/Login";
+import Login from "./pages/login/Login";
 import "./App.scss"
 
 

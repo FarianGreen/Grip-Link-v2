@@ -23,6 +23,18 @@ const initialState: AuthState = {
   error: null,
 };
 
+export const registerUser = createAsyncThunk(
+  "auth/registerUser",
+  async (credentials: { name: string; email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("http://localhost:5000/auth/register", credentials);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Ошибка регистрации");
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (
@@ -118,6 +130,21 @@ const authSlice = createSlice({
       .addCase(refreshAccessToken.rejected, (state) => {
         state.isLogined = false;
         state.user = null;
+      })
+      
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action: PayloadAction<{ accessToken: string; user: User }>) => {
+        state.loading = false;
+        state.isLogined = true;
+        localStorage.setItem("accessToken", action.payload.accessToken);
+        state.user = action.payload.user;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../store/authSlice";
-import { AppDispatch, RootState } from "../store/store";
+import { loginUser } from "../../store/authSlice";
+import { AppDispatch, RootState } from "../../store/store";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
