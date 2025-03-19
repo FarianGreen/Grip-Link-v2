@@ -3,6 +3,9 @@ import { useEffect } from "react";
 import { Path } from "./constants/Path";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
+import { Header } from "./pages/header/header";
+import { Sidebar } from "./pages/sidebar/sidebar";
+import "./App.scss"
 
 export const Layout = () => {
   const { isLogined } = useSelector((state: RootState) => state.auth);
@@ -14,9 +17,11 @@ export const Layout = () => {
   });
   return (
     <>
-      {/* <Header /> */}
-      <Outlet />
-      {/* <Sidebar /> */}
+      <Header />
+      <div className="layout">
+        <Sidebar />
+        <Outlet />
+      </div>
     </>
   );
 };

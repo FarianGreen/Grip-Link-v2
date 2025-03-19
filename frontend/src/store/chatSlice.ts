@@ -34,20 +34,42 @@ const initialState: ChatState = {
   messages: [],
 };
 
-export const fetchChats = createAsyncThunk("chat/fetchChats", async (_, { dispatch, rejectWithValue }) => {
-  try {
-    const response = await axios.get<Chat[]>("http://localhost:5000/api/chats", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-    });
-    return response.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      await dispatch(refreshAccessToken());
-      return rejectWithValue("Токен обновлен, попробуйте снова.");
+export const fetchChats = createAsyncThunk(
+  "chat/fetchChats",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      const response = await axios.get<Chat[]>("http://localhost:5000/api/chats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        console.warn("⚠️ Access token истек, обновляем...");
+
+        const refreshResponse = await dispatch(refreshAccessToken()).unwrap();
+        if (!refreshResponse) {
+          return rejectWithValue("Ошибка обновления токена");
+        }
+
+        try {
+          const newToken = localStorage.getItem("accessToken");
+          const retryResponse = await axios.get<Chat[]>("http://localhost:5000/api/chats", {
+            headers: { Authorization: `Bearer ${newToken}` },
+          });
+
+          return retryResponse.data;
+        } catch (retryError: any) {
+          return rejectWithValue(retryError.response?.data?.message || "Ошибка загрузки чатов после обновления токена");
+        }
+      }
+
+      return rejectWithValue(error.response?.data?.message || "Ошибка загрузки чатов");
     }
-    return rejectWithValue(axios.isAxiosError(error) ? error.response?.data?.message : "Ошибка загрузки сообщений");
   }
-});
+);
 
 export const fetchMessages = createAsyncThunk("chat/fetchMessages", async (chatId: number, { dispatch, rejectWithValue }) => {
   try {
@@ -55,12 +77,12 @@ export const fetchMessages = createAsyncThunk("chat/fetchMessages", async (chatI
       headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
     });
     return response.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
       await dispatch(refreshAccessToken());
       return rejectWithValue("Токен обновлен, попробуйте снова.");
     }
-    return rejectWithValue(axios.isAxiosError(error) ? error.response?.data?.message : "Ошибка загрузки сообщений");
+    return rejectWithValue(error.response?.data?.message || "Ошибка загрузки сообщений");
   }
 });
 

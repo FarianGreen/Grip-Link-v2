@@ -3,13 +3,12 @@ import { validationResult } from "express-validator";
 import AppDataSource from "../data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
-interface CustomJwtPayload {
+interface DecodedToken {
   id: number;
-  refreshToken: string;
+  role: "user" | "admin";
 }
-
 const userRepository = AppDataSource.getRepository(User);
 
 const generateTokens = (userId: number, role?: "user" | "admin") => {
@@ -49,11 +48,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const newUser = userRepository.create({ name, email, passwordHash, role });
     await userRepository.save(newUser);
 
-    const token = jwt.sign({ id: newUser.id, role: newUser.role }, "secret", { expiresIn: "30d" });
+    const token = jwt.sign({ id: newUser.id, role: newUser.role }, "secret", {
+      expiresIn: "30d",
+    });
 
-    res
-      .status(201)
-      .json({ token, user: { id: newUser.id, name, email, role:newUser.role } });
+    res.status(201).json({
+      token,
+      user: { id: newUser.id, name, email, role: newUser.role },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка регистрации" });
@@ -78,8 +80,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
     });
     res.json({ accessToken, user: { id: user.id, name: user.name, email } });
   } catch (error) {
@@ -88,7 +90,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Получение информации о себе
 export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.body.userId;
@@ -117,7 +118,7 @@ export const refreshToken = async (
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, "refreshSecret") as CustomJwtPayload;
+    const decoded = jwt.verify(refreshToken, "refreshSecret") as DecodedToken;
     const user = await userRepository.findOne({
       where: { id: decoded.id, refreshToken },
     });
@@ -140,11 +141,10 @@ export const refreshToken = async (
     });
     res.json({ accessToken });
   } catch {
-    res.status(403).json({ message: "Ошибка refresh токена" });
+    res.status(403).json({ message: "Неверный refresh токен" });
   }
 };
 
-// Выход из системы (удаление refreshToken)
 export const logout = async (req: Request, res: Response): Promise<void> => {
   const { refreshToken } = req.cookies;
   if (!refreshToken) {

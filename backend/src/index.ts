@@ -9,17 +9,21 @@ import cors from "cors";
 import { setupWebSocket } from "./websocket";
 import dotenv from "dotenv";
 
-dotenv.config(); // Загружаем переменные окружения
+dotenv.config();
 
 const app: Application = express();
-const server: http.Server = http.createServer(app); // Создаём HTTP сервер
+const server: http.Server = http.createServer(app);
 
-setupWebSocket(server); // Инициализируем WebSockets
-
-app.use(cors());
+setupWebSocket(server);
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
-
 const PORT = process.env.PORT || 5000;
 AppDataSource.initialize()
   .then(() => {
