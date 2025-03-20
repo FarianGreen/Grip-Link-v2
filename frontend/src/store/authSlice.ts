@@ -44,7 +44,8 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await axios.post(
         "http://localhost:5000/auth/login",
-        credentials
+        credentials,
+        { withCredentials: true }
       );
       return response.data;
     } catch (error: any) {
@@ -77,8 +78,8 @@ export const refreshAccessToken = createAsyncThunk(
   "auth/refreshAccessToken",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get<{ accessToken: string }>(
-        "http://localhost:5000/auth/refresh",
+      const response = await axios.post<{ accessToken: string }>(
+        "http://localhost:5000/auth/refresh",{},
         {
           withCredentials: true,
         }

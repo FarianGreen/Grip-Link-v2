@@ -1,5 +1,7 @@
 .layout {
   display: flex;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 .chats-container {
   display: flex;
