@@ -1,17 +1,6 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "variables";
+@import "mixins";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
 *,
 *::before,
 *::after {
@@ -20,25 +9,45 @@
   box-sizing: border-box;
 }
 
-/* Убираем все декоративные элементы */
 body,
-h1, h2, h3, h4, h5, h6,
-p, ul, ol, li, dl, dt, dd,
-blockquote, figure, fieldset, legend,
-pre, code, hr {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+li,
+dl,
+dt,
+dd,
+blockquote,
+figure,
+fieldset,
+legend,
+pre,
+code,
+hr {
   margin: 0;
   padding: 0;
   border: 0;
   font-size: inherit;
   font-family: inherit;
 }
-
-/* Убираем стили у списка */
-ul, ol {
+body {
+  background: $background-color;
+  font-family: "Roboto", sans-serif;
+  color: $text-color;
+  margin: 0;
+  padding: 0;
+}
+ul,
+ol {
   list-style: none;
 }
 
-/* Убираем стандартные стили у ссылок */
 a {
   text-decoration: none;
   color: inherit;
@@ -46,7 +55,7 @@ a {
 a:hover {
   color: #535bf2;
 }
-.app{
+.app {
   display: flex;
   justify-content: center;
 }
