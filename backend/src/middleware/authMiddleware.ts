@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+export interface AuthUser {
+  id: number;
+  role: "user" | "admin";
+}
 interface AuthRequest extends Request {
-  user?: { id: number; role: "user" | "admin" }; 
+  user?: AuthUser;
 }
 
 interface DecodedToken {
@@ -29,7 +33,7 @@ export const authMiddleware = (
     }
 
     const decoded = jwt.verify(tokenParts[1], "secret") as DecodedToken;
-    req.user = { id: decoded.id, role: decoded.role }; 
+    req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch (error) {
     res.status(401).json({ message: "Неверный токен" });

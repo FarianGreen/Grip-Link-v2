@@ -88,11 +88,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.log(error);
     res.status(500).json({ message: "Ошибка при входе в систему" });
   }
-};
+}
 
 export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.body.userId;
+    const userId = (req as any).user?.id;
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {

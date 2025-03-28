@@ -1,4 +1,15 @@
-.header{
-    display: flex;
-    gap: 1rem;
+@import "../../assets/styles/mixins";
+@import "../../assets/styles/variables";
+
+.header {
+  display: flex;
+  gap: 1rem;
+  height: $header-height;
+  width: 100%;
+  background: $primary-color;
+  color: #fff;
+//   @include flex-center;
+  gap: 20px;
+//   @include box-shadow-light;
+  flex-shrink: 0;
 }

@@ -16,7 +16,7 @@ const MessageInput: React.FC = () => {
 
   const sendMessage = () => {
     if (!message.trim() || !selectedChatId || !user) return;
-
+    
     const messageData = {
       chatId: selectedChatId,
       senderId: user?.id,

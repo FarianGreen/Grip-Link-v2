@@ -22,14 +22,11 @@ const registerValidation: ValidationChain[] = [
     .withMessage("Пароль должен содержать минимум 6 символов"),
 ];
 
-
 router.post("/register", registerValidation, (req: Request, res: Response) =>
   register(req, res)
 );
-router.post("/login", (req: Request, res: Response) => login(req, res));
-router.get("/me", authMiddleware, (req: Request, res: Response) =>
-  getMe(req, res)
-);
+router.post("/login", login);
+router.get("/me", authMiddleware, getMe);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
 

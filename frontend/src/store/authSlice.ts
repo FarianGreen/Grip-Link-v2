@@ -25,12 +25,20 @@ const initialState: AuthState = {
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
-  async (credentials: { name: string; email: string; password: string }, { rejectWithValue }) => {
+  async (
+    credentials: { name: string; email: string; password: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await axios.post("http://localhost:5000/auth/register", credentials);
+      const response = await axios.post(
+        "http://localhost:5000/auth/register",
+        credentials
+      );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Ошибка регистрации");
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка регистрации"
+      );
     }
   }
 );
@@ -76,16 +84,18 @@ export const fetchUser = createAsyncThunk(
 
 export const refreshAccessToken = createAsyncThunk(
   "auth/refreshAccessToken",
-  async (_, { rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await axios.post<{ accessToken: string }>(
-        "http://localhost:5000/auth/refresh",{},
+        "http://localhost:5000/auth/refresh",
+        {},
         {
           withCredentials: true,
         }
       );
       localStorage.setItem("accessToken", response.data.accessToken);
-      return response.data.accessToken;
+      const userResponse = await dispatch(fetchUser()).unwrap();
+      return { accessToken: response.data.accessToken, user: userResponse };
     } catch (error: any) {
       return rejectWithValue("Ошибка обновления токена");
     }
@@ -125,24 +135,32 @@ const authSlice = createSlice({
         state.user = action.payload;
       });
     builder
-      .addCase(refreshAccessToken.fulfilled, (state, action) => {
+    .addCase(
+      refreshAccessToken.fulfilled,
+      (state, action: PayloadAction<{ accessToken: string; user: User }>) => {
         state.isLogined = true;
-      })
+        localStorage.setItem("accessToken", action.payload.accessToken);
+        state.user = action.payload.user;
+      }
+    )
       .addCase(refreshAccessToken.rejected, (state) => {
         state.isLogined = false;
         state.user = null;
       })
-      
+
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action: PayloadAction<{ accessToken: string; user: User }>) => {
-        state.loading = false;
-        state.isLogined = true;
-        localStorage.setItem("accessToken", action.payload.accessToken);
-        state.user = action.payload.user;
-      })
+      .addCase(
+        registerUser.fulfilled,
+        (state, action: PayloadAction<{ accessToken: string; user: User }>) => {
+          state.loading = false;
+          state.isLogined = true;
+          localStorage.setItem("accessToken", action.payload.accessToken);
+          state.user = action.payload.user;
+        }
+      )
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;

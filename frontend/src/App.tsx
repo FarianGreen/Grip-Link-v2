@@ -1,7 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { Layout } from './layout';
 import { Path } from './constants/Path';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from './store/store';
+import { fetchUser } from './store/authSlice';
 
 
 
@@ -24,6 +27,14 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      dispatch(fetchUser());
+    }
+  }, [dispatch]);
   return <RouterProvider router={router} />;
 }
 

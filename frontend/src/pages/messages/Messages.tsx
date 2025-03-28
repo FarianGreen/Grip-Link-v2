@@ -1,5 +1,6 @@
 import ChatList from "../../components/ChatList";
 import ChatWindow from "../../components/ChatWindow";
+import "./messages.scss"
 
 const MessagesPage = () => {
   return (
