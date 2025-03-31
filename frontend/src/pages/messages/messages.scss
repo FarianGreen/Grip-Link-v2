@@ -2,36 +2,34 @@
 
 .chats-container {
   display: flex;
-  height: 100vh;
+  height: 95vh;
+  width: 95vw;
   background: $background-color;
 }
 
 .chat-list {
   width: 15vw;
-  background: $sidebar-color;
+  background-color: $sidebar-background;
   border-right: 1px solid $border-color;
-  padding: 10px;
+  padding: $spacing-small;
   overflow-y: auto;
-
-  h2 {
-    font-size: 1.2rem;
-    color: $text-color;
-  }
 
   .chat-item {
     padding: 12px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background-color $transition;
     border-radius: 5px;
     margin-bottom: 5px;
+    background-color: $card-background;
+    color: $text-primary;
 
     &:hover {
-      background: lighten($sidebar-color, 10%);
+      background-color: lighten($card-background, 5%);
     }
 
     &.active {
-      background: $primary-color;
-      color: #fff;
+      background: linear-gradient(to right, $primary-color, $secondary-color);
+      color: white;
     }
   }
 }
@@ -40,9 +38,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 95vh;
-  width: 80vw;
-  overflow: hidden;
+  background: $background-color;
 }
 
 .chat-window {
@@ -52,38 +48,33 @@
   padding: 15px;
   overflow: hidden;
 
-  h2 {
-    font-size: 1.5rem;
-    color: $primary-color;
-  }
-
   .messages {
     flex: 1;
     overflow-y: auto;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 5px;
+    padding: $spacing-small;
+    background: darken($background-color, 5%);
+    border-radius: $border-radius;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-    max-height: calc(100vh - 120px);
+  }
 
-    .message {
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 8px;
-      max-width: 80%;
-      word-break: break-word;
+  .message {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: $border-radius;
+    max-width: 80%;
+    word-break: break-word;
+    transition: background-color $transition;
 
-      &.sent {
-        background: $primary-color;
-        color: white;
-        align-self: flex-end;
-      }
+    &.sent {
+      background: $primary-color;
+      color: white;
+      align-self: flex-end;
+    }
 
-      &.received {
-        background: #e5e5ea;
-        color: black;
-        align-self: flex-start;
-      }
+    &.received {
+      background: darken($card-background, 10%);
+      color: $text-primary;
+      align-self: flex-start;
     }
   }
 }
@@ -92,7 +83,7 @@
   display: flex;
   padding: 10px;
   border-top: 1px solid $border-color;
-  background: white;
+  background-color: $sidebar-background;
 
   input {
     flex: 1;

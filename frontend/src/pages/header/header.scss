@@ -1,15 +1,26 @@
-@import "../../assets/styles/mixins";
 @import "../../assets/styles/variables";
+@import "../../assets/styles/mixins";
 
 .header {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 1rem;
-  height: $header-height;
+  height: 60px;
   width: 100%;
-  background: $primary-color;
-  color: #fff;
-//   @include flex-center;
-  gap: 20px;
-//   @include box-shadow-light;
-  flex-shrink: 0;
+  background: linear-gradient(to right, $primary-color, darken($primary-color, 25%));
+  color: $text-primary;
+  box-shadow: $box-shadow-light;
+  padding: 0 $spacing-medium;
+
+  &__nav-menu-item {
+    font-size: 18px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color $transition;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
 }

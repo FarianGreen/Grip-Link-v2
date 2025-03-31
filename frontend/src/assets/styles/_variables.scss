@@ -1,14 +1,32 @@
+// Основные цвета
 $primary-color: #6200ea;
-$secondary-color: #03dac6;
-$background-color: #f5f5f5;
-$text-color: #212121;
-$error-color:rgb(192, 22, 22);
-$sidebar-color:#ac95b9;
-$border-color:#c5c5c5;
+$secondary-color: #03DAC6;
+$background-color: #121212;
+$card-background: #1E1E1E;
+$header-background: #1E1E1E;
+$sidebar-background: #1E1E1E;
+$text-primary: #E0E0E0;
+$text-secondary: #B0B0B0;
+$error-color: #CF6679;
+$border-color: #333; // затемнённый цвет границы
 $header-height: 60px;
-$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
-$box-shadow-medium: 2px 0 5px rgba(0, 0, 0, 0.1);
 
+// Прозрачные эффекты
+$overlay-dark: rgba(0, 0, 0, 0.6);
+
+// Тени
+$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.2);
+$box-shadow-medium: 2px 0 5px rgba(0, 0, 0, 0.3);
+
+// Общие отступы и размеры
 $border-radius: 8px;
 $padding: 16px;
 $transition: 0.3s ease-in-out;
+
+// Шрифты
+$font-family: 'Inter', sans-serif;
+
+// Отступы
+$spacing-small: 8px;
+$spacing-medium: 16px;
+$spacing-large: 24px;
