@@ -3,7 +3,7 @@
 .chats-container {
   display: flex;
   height: 95vh;
-  width: 95vw;
+  width: 100vw;
   background: $background-color;
 }
 
@@ -28,14 +28,16 @@
     }
 
     &.active {
-      background: linear-gradient(to right, $primary-color, $secondary-color);
+      border: 2px solid transparent;
+      border-image: linear-gradient(to right, #a928ff, $secondary-color)
+        1;
       color: white;
     }
   }
 }
 
 .chat-container {
-  flex: 1;
+  width: 76vw;
   display: flex;
   flex-direction: column;
   background: $background-color;

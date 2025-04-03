@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { Path } from "./constants/Path";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
-import { Header } from "./pages/header/header";
-import { Sidebar } from "./pages/sidebar/sidebar";
+import { Header } from "./components/header/header";
+import { Sidebar } from "./components/sidebar/sidebar";
 import "./App.scss"
 
 export const Layout = () => {

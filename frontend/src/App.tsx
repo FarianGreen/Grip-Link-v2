@@ -11,6 +11,7 @@ import { fetchUser } from './store/authSlice';
 const MessagesPage = lazy(() => import('./pages/messages/Messages'));
 const RegisterForm = lazy(() => import('./pages/register/Register'));
 const LoginForm = lazy(() => import('./pages/login/Login'));
+const HomePage =lazy(()=> import('./pages/home/Home'))
 
 
 const router = createBrowserRouter([
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <Layout />,
     children: [
-      // { index: true, element: <Suspense fallback={<div>Loading...</div>}><Home /></Suspense> },
+      { index: true, element: <Suspense fallback={<div>Loading...</div>}><HomePage /></Suspense> },
       { path: Path.messages, element: <Suspense fallback={<div>Loading...</div>}><MessagesPage /></Suspense> },
     ],
   },
@@ -31,7 +32,7 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
+    if (!token) {
       dispatch(fetchUser());
     }
   }, [dispatch]);

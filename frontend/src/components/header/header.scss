@@ -8,10 +8,15 @@
   gap: 1rem;
   height: 60px;
   width: 100%;
-  background: linear-gradient(to right, $primary-color, darken($primary-color, 25%));
+  background: linear-gradient(
+    to right,
+    $primary-color,
+    darken($primary-color, 25%)
+  );
   color: $text-primary;
   box-shadow: $box-shadow-light;
   padding: 0 $spacing-medium;
+  border-bottom: 2px solid $border-color;
 
   &__nav-menu-item {
     font-size: 18px;
@@ -21,6 +26,11 @@
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
+    }
+    &.active {
+      border: 2px solid transparent;
+      border-image: linear-gradient(to right, #a928ff, $secondary-color) 1;
+      color: white;
     }
   }
 }
