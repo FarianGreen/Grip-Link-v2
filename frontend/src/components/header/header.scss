@@ -17,6 +17,31 @@
   box-shadow: $box-shadow-light;
   padding: 0 $spacing-medium;
   border-bottom: 2px solid $border-color;
+  
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+  }
+
+  .header__side {
+    width: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .header-links {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 
   &__nav-menu-item {
     font-size: 18px;
@@ -32,5 +57,9 @@
       border-image: linear-gradient(to right, #a928ff, $secondary-color) 1;
       color: white;
     }
+  }
+  .header-logout-btn{
+    border: 2px solid $border-color;
+    box-shadow: $box-shadow-light;
   }
 }

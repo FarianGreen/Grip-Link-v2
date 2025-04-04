@@ -2,13 +2,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import chatReducer, { addMessage } from "./chatSlice";
 import authReducer from "./authSlice";
 import { connectSocket, getSocket } from "../services/socket";
-import { headerReducer } from "./hederSlice";
 
 const store = configureStore({
   reducer: {
     chat: chatReducer,
     auth: authReducer,
-    header: headerReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
