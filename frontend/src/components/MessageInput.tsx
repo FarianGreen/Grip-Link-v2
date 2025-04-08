@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { getSocket } from "../services/socket";
 import { addMessage } from "../store/chatSlice";
+import { addNotification } from "../store/notificationsSlice";
 
 const MessageInput: React.FC = () => {
   const [message, setMessage] = useState("");
@@ -16,7 +17,7 @@ const MessageInput: React.FC = () => {
 
   const sendMessage = () => {
     if (!message.trim() || !selectedChatId || !user) return;
-    
+
     const messageData = {
       chatId: selectedChatId,
       senderId: user?.id,
@@ -32,7 +33,12 @@ const MessageInput: React.FC = () => {
         createdAt: new Date().toISOString(),
       })
     );
+
     setMessage("");
+  };
+  const handleClick = () => {
+    console.log("yay");
+    dispatch(addNotification({ message: "✅ Всё работает!", type: "success" }));
   };
 
   return (
@@ -44,6 +50,7 @@ const MessageInput: React.FC = () => {
         placeholder="Введите сообщение..."
       />
       <button onClick={sendMessage}>Отправить</button>
+      <button onClick={handleClick}>Показать уведомление</button>
     </div>
   );
 };

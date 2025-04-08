@@ -2,11 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import chatReducer, { addMessage } from "./chatSlice";
 import authReducer from "./authSlice";
 import { connectSocket, getSocket } from "../services/socket";
+import { notificationReducer } from "./notificationsSlice";
+
 
 const store = configureStore({
   reducer: {
     chat: chatReducer,
     auth: authReducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

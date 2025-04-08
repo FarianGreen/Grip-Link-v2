@@ -6,6 +6,7 @@ import { RootState } from "./store/store";
 import { Header } from "./components/header/header";
 import { Sidebar } from "./components/sidebar/sidebar";
 import "./App.scss"
+import { NotificationContainer } from "./components/notification/NotificationContainer";
 
 export const Layout = () => {
   const { isLogined } = useSelector((state: RootState) => state.auth);
@@ -21,6 +22,7 @@ export const Layout = () => {
       <div className="layout">
         <Sidebar />
         <Outlet />
+        <NotificationContainer/>
       </div>
     </>
   );

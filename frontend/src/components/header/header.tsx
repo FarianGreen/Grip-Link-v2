@@ -12,6 +12,9 @@ export const Header = () => {
   const handleClick = (path: string) => {
     setActiveItem(path);
   };
+  const handleLogOut = () => {
+    dispatch(logout());
+  };
   return (
     <section className="header">
       <div className="header__inner">
@@ -34,10 +37,7 @@ export const Header = () => {
           ))}
         </ul>
         <div className="header__side">
-          <button
-            className="header-logout-btn"
-            onClick={() => dispatch(logout())}
-          >
+          <button className="header-logout-btn" onClick={() => handleLogOut()}>
             Выйти
           </button>
         </div>
