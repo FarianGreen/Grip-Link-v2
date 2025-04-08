@@ -11,7 +11,6 @@ const ChatList: React.FC = () => {
     useEffect(() => {
         dispatch(fetchChats()); 
     }, [dispatch]);
-    
     return (
         <div className="chat-list">
             <h2>Чаты</h2>
