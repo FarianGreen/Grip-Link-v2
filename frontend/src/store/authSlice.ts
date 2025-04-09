@@ -3,6 +3,7 @@ import axios from "axios";
 import { RootState } from "./store";
 
 interface User {
+  bio: string;
   id: number;
   name: string;
   email: string;

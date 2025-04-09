@@ -88,7 +88,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.log(error);
     res.status(500).json({ message: "Ошибка при входе в систему" });
   }
-}
+};
 
 export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -100,7 +100,12 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({ id: user.id, name: user.name, email: user.email });
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка при получении данных" });
@@ -160,4 +165,40 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
   res.clearCookie("refreshToken");
   res.json({ message: "Вы вышли из системы" });
+};
+
+export const updateProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).user?.id;
+  console.log(req);
+  if (!userId) {
+    res.status(401).json({ message: "Неавторизован" });
+    return;
+  }
+
+  try {
+    const user = await userRepository.findOneBy({ id: userId });
+    if (!user) {
+      res.status(404).json({ message: "Пользователь не найден" });
+      return;
+    }
+
+    const { name, bio } = req.body;
+
+    if (name) user.name = name;
+    if (bio !== undefined) user.bio = bio;
+
+    await userRepository.save(user);
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+    });
+  } catch (err) {
+    console.error("Ошибка при обновлении профиля:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
 };

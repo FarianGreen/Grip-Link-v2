@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { RootState } from "../../store/store";
+import { AppDispatch, RootState } from "../../store/store";
 import "./home.scss";
 import { useDispatch, useSelector } from "react-redux";
+import { updateProfile } from "../../store/profileSlice";
 
 const HomePage = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name:"",
-    email:"",
+    name: "",
+    email: "",
     bio: "",
   });
 
@@ -20,17 +22,19 @@ const HomePage = () => {
 
   const handleEditToggle = () => setIsEditing(!isEditing);
 
-  const handleSave = () => {
-    // TODO: позже добавим dispatch в бекенд
-    setIsEditing(false);
+  const handleSave = async () => {
+    const { name, bio } = formData;
+    // Отправка данных на сервер для обновления профиля
+    await dispatch(updateProfile({ name, bio }));
+    setIsEditing(false); // Выход из режима редактирования
   };
-
+console.log(user)
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name,
         email: user.email,
-        bio: "Тут могла бы быть ваша биография 😎", // позже добавим из user
+        bio: user.bio || "Тут могла бы быть ваша биография 😎", // Используем значение bio, если оно есть
       });
     }
   }, [user]);
@@ -54,12 +58,6 @@ const HomePage = () => {
               onChange={handleChange}
               placeholder="Имя"
             />
-            <input
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email"
-            />
             <textarea
               name="bio"
               value={formData.bio}
@@ -75,7 +73,9 @@ const HomePage = () => {
               Сохранить
             </button>
           ) : (
-            <button className="profile__edit-btn" onClick={handleEditToggle}>Редактировать профиль</button>
+            <button className="profile__edit-btn" onClick={handleEditToggle}>
+              Редактировать профиль
+            </button>
           )}
         </div>
       </div>

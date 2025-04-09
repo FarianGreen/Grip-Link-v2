@@ -3,13 +3,14 @@ import chatReducer, { addMessage } from "./chatSlice";
 import authReducer from "./authSlice";
 import { connectSocket, getSocket } from "../services/socket";
 import { notificationReducer } from "./notificationsSlice";
-
+import profileReducer from "./profileSlice";
 
 const store = configureStore({
   reducer: {
     chat: chatReducer,
     auth: authReducer,
     notifications: notificationReducer,
+    profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -6,6 +6,7 @@ import {
   getMe,
   refreshToken,
   logout,
+  updateProfile,
 } from "../controllers/UserController";
 import { authMiddleware, isAdmin } from "../middleware/authMiddleware";
 
@@ -29,6 +30,7 @@ router.post("/login", login);
 router.get("/me", authMiddleware, getMe);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
+router.put("/profile", authMiddleware, updateProfile);
 
 router.post("/admin-only", authMiddleware, isAdmin, (req, res) => {
   res.json({ message: "Только для админов" });
