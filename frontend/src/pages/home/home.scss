@@ -53,6 +53,27 @@
     margin-top: $spacing-medium;
   }
 
+  &__edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+
+    input,
+    textarea {
+      padding: 10px;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      font-family: $font-family;
+      background-color: $background-color;
+      color: $text-primary;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+  }
+
   &__edit-btn {
     background-color: $primary-color;
     color: black;
