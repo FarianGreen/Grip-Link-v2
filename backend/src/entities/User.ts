@@ -21,9 +21,12 @@ export class User {
 
   @Column()
   passwordHash!: string;
-  
+
   @Column({ type: "text", nullable: true })
   bio?: string;
+
+  @Column({ nullable: true })
+  avatar?: string;
 
   @Column({ nullable: true })
   refreshToken?: string;

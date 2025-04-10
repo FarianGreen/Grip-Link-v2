@@ -9,6 +9,8 @@ import {
   updateProfile,
 } from "../controllers/UserController";
 import { authMiddleware, isAdmin } from "../middleware/authMiddleware";
+import { uploadAvatar } from "../middleware/uploadAvatar";
+import { updateAvatar } from "../controllers/AuthController";
 
 const router: Router = express.Router();
 
@@ -31,6 +33,12 @@ router.get("/me", authMiddleware, getMe);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
 router.put("/profile", authMiddleware, updateProfile);
+router.put(
+  "/profile/avatar",
+  authMiddleware,
+  uploadAvatar.single("avatar"),
+  updateAvatar
+);
 
 router.post("/admin-only", authMiddleware, isAdmin, (req, res) => {
   res.json({ message: "Только для админов" });

@@ -4,14 +4,22 @@ import "./home.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProfile } from "../../store/profileSlice";
 
+interface ProfileFormData {
+  name: string;
+  email: string;
+  bio: string;
+  avatar: File | null;
+}
+
 const HomePage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: "",
     email: "",
     bio: "",
+    avatar: null,
   });
 
   const handleChange = (
@@ -20,21 +28,35 @@ const HomePage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({ ...formData, avatar: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, avatar: null });
+    }
+  };
+
   const handleEditToggle = () => setIsEditing(!isEditing);
 
   const handleSave = async () => {
-    const { name, bio } = formData;
-    // Отправка данных на сервер для обновления профиля
-    await dispatch(updateProfile({ name, bio }));
-    setIsEditing(false); // Выход из режима редактирования
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("bio", formData.bio);
+    if (formData.avatar) {
+      data.append("avatar", formData.avatar); // Добавляем аватар
+    }
+    // Отправляем данные
+    dispatch(updateProfile(data)); // Отправляем с помощью redux
+    handleEditToggle()
   };
-console.log(user)
+  console.log(user);
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name,
         email: user.email,
-        bio: user.bio || "Тут могла бы быть ваша биография 😎", // Используем значение bio, если оно есть
+        bio: user.bio || "Тут могла бы быть ваша биография 😎",
+        avatar: null,
       });
     }
   }, [user]);
@@ -42,7 +64,15 @@ console.log(user)
     <section className="profile">
       <div className="profile__card">
         <div className="profile__avatar">
-          <img src="./src\assets\img\ava.jpg" alt="Аватар" />
+          <img
+            src={
+              user?.avatar
+                ? `http://localhost:5000/uploads/avatars/${user.avatar}`
+                : "null"
+            }
+            alt="Аватар"
+            className="profile__avatar-img"
+          />
         </div>
         {!isEditing ? (
           <div className="profile__info">
@@ -63,6 +93,12 @@ console.log(user)
               value={formData.bio}
               onChange={handleChange}
               placeholder="О себе..."
+            />
+            <input
+              type="file"
+              name="avatar"
+              onChange={handleAvatarChange}
+              className="profile__file-input"
             />
           </form>
         )}

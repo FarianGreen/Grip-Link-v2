@@ -8,6 +8,7 @@ import AppDataSource from "./data-source";
 import cors from "cors";
 import { setupWebSocket } from "./websocket";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(
     credentials: true,
   })
 );
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.json());
 app.use(cookieParser());
 const PORT = process.env.PORT || 5000;

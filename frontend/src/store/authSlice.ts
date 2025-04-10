@@ -7,6 +7,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  avatar: string;
   role: "user" | "admin";
 }
 
@@ -136,14 +137,14 @@ const authSlice = createSlice({
         state.user = action.payload;
       });
     builder
-    .addCase(
-      refreshAccessToken.fulfilled,
-      (state, action: PayloadAction<{ accessToken: string; user: User }>) => {
-        state.isLogined = true;
-        localStorage.setItem("accessToken", action.payload.accessToken);
-        state.user = action.payload.user;
-      }
-    )
+      .addCase(
+        refreshAccessToken.fulfilled,
+        (state, action: PayloadAction<{ accessToken: string; user: User }>) => {
+          state.isLogined = true;
+          localStorage.setItem("accessToken", action.payload.accessToken);
+          state.user = action.payload.user;
+        }
+      )
       .addCase(refreshAccessToken.rejected, (state) => {
         state.isLogined = false;
         state.user = null;
