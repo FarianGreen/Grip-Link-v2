@@ -1,25 +1,65 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class InitDatabase1741779028393 implements MigrationInterface {
-    name = 'InitDatabase1741779028393';
+export class InitDatabaseYYYYMMDDHHMMSS implements MigrationInterface {
+  name = 'InitDatabase1741779028393';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        const tableExist = await queryRunner.hasTable('chat');
-        if (!tableExist) {
-            await queryRunner.query(`CREATE TABLE "chat" ("id" SERIAL NOT NULL, CONSTRAINT "PK_9d0b2ba74336710fd31154738a5" PRIMARY KEY ("id"))`);
-        }
-        // Убедитесь, что таблица user существует
-        const userTableExist = await queryRunner.hasTable('user');
-        if (!userTableExist) {
-            await queryRunner.query(`CREATE TABLE "user" ("id" SERIAL NOT NULL, "name" character varying(100) NOT NULL, "email" character varying NOT NULL, "passwordHash" character varying NOT NULL, "refreshToken" character varying, "role" "public"."user_role_enum" NOT NULL DEFAULT 'user', CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
-        }
-        // Аналогично для остальных таблиц
-    }
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE TYPE "user_role_enum" AS ENUM('user', 'admin')`);
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP TABLE IF EXISTS "chat_users_user"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "user"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "message"`);
-        await queryRunner.query(`DROP TABLE IF EXISTS "chat"`);
-    }
+    await queryRunner.query(`
+      CREATE TABLE "user" (
+        "id" SERIAL PRIMARY KEY,
+        "name" VARCHAR(100) NOT NULL,
+        "email" VARCHAR NOT NULL UNIQUE,
+        "passwordHash" VARCHAR NOT NULL,
+        "refreshToken" VARCHAR,
+        "role" "user_role_enum" NOT NULL DEFAULT 'user',
+        "bio" TEXT
+      )
+    `);
+
+    await queryRunner.query(`
+      CREATE TABLE "chat" (
+        "id" SERIAL PRIMARY KEY
+      )
+    `);
+
+    await queryRunner.query(`
+      CREATE TABLE "message" (
+        "id" SERIAL PRIMARY KEY,
+        "content" VARCHAR NOT NULL,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+        "senderId" INTEGER,
+        "receiverId" INTEGER,
+        "chatId" INTEGER,
+        CONSTRAINT "FK_sender" FOREIGN KEY ("senderId") REFERENCES "user"("id") ON DELETE CASCADE,
+        CONSTRAINT "FK_receiver" FOREIGN KEY ("receiverId") REFERENCES "user"("id") ON DELETE CASCADE,
+        CONSTRAINT "FK_chat" FOREIGN KEY ("chatId") REFERENCES "chat"("id") ON DELETE CASCADE
+      )
+    `);
+
+    await queryRunner.query(`
+      CREATE TABLE "chat_users_user" (
+        "chatId" INTEGER NOT NULL,
+        "userId" INTEGER NOT NULL,
+        PRIMARY KEY ("chatId", "userId"),
+        CONSTRAINT "FK_chat_user_chat" FOREIGN KEY ("chatId") REFERENCES "chat"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT "FK_chat_user_user" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+      )
+    `);
+
+    await queryRunner.query(`CREATE INDEX "IDX_chatId" ON "chat_users_user" ("chatId")`);
+    await queryRunner.query(`CREATE INDEX "IDX_userId" ON "chat_users_user" ("userId")`);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP INDEX "IDX_userId"`);
+    await queryRunner.query(`DROP INDEX "IDX_chatId"`);
+
+    await queryRunner.query(`DROP TABLE "chat_users_user"`);
+    await queryRunner.query(`DROP TABLE "message"`);
+    await queryRunner.query(`DROP TABLE "chat"`);
+    await queryRunner.query(`DROP TABLE "user"`);
+    await queryRunner.query(`DROP TYPE "user_role_enum"`);
+  }
 }

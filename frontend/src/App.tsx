@@ -55,9 +55,8 @@ const router = createBrowserRouter([
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
-
+  const token = localStorage.getItem("accessToken");
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
     if (!token || !user) {
       dispatch(fetchUser());
     }
