@@ -31,8 +31,8 @@ AppDataSource.initialize()
   .then(() => {
     console.log("✅ Connected to PostgreSQL");
 
-    app.use("/auth", authRoutes);
-    app.use("/api", chatRoutes);
+    app.use("/api/auth", authRoutes);
+    app.use("/api/", chatRoutes);
     app.use("/api", messageRoutes);
 
     server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

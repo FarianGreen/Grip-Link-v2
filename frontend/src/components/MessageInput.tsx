@@ -37,7 +37,6 @@ const MessageInput: React.FC = () => {
     setMessage("");
   };
   const handleClick = () => {
-    console.log("yay");
     dispatch(addNotification({ message: "✅ Всё работает!", type: "success" }));
   };
 

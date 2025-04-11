@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { refreshAccessToken } from "./authSlice";
+import axiosInstance from "../services/api/axiosInstance";
 
 interface User {
   id: number;
@@ -34,54 +33,20 @@ const initialState: ChatState = {
   messages: [],
 };
 
-export const fetchChats = createAsyncThunk(
-  "chat/fetchChats",
-  async (_, { dispatch, rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-
-      const response = await axios.get<Chat[]>("http://localhost:5000/api/chats", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        console.warn("⚠️ Access token истек, обновляем...");
-
-        const refreshResponse = await dispatch(refreshAccessToken()).unwrap();
-        if (!refreshResponse) {
-          return rejectWithValue("Ошибка обновления токена");
-        }
-
-        try {
-          const newToken = localStorage.getItem("accessToken");
-          const retryResponse = await axios.get<Chat[]>("http://localhost:5000/api/chats", {
-            headers: { Authorization: `Bearer ${newToken}` },
-          });
-
-          return retryResponse.data;
-        } catch (retryError: any) {
-          return rejectWithValue(retryError.response?.data?.message || "Ошибка загрузки чатов после обновления токена");
-        }
-      }
-
-      return rejectWithValue(error.response?.data?.message || "Ошибка загрузки чатов");
-    }
-  }
-);
-
-export const fetchMessages = createAsyncThunk("chat/fetchMessages", async (chatId: number, { dispatch, rejectWithValue }) => {
+export const fetchChats = createAsyncThunk("chat/fetchChats", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get<Message[]>(`http://localhost:5000/api/chats/${chatId}/messages`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-    });
+    const response = await axiosInstance.get<Chat[]>("/chats");
     return response.data;
   } catch (error: any) {
-    if (error.response?.status === 401) {
-      await dispatch(refreshAccessToken());
-      return rejectWithValue("Токен обновлен, попробуйте снова.");
-    }
+    return rejectWithValue(error.response?.data?.message || "Ошибка загрузки чатов");
+  }
+});
+
+export const fetchMessages = createAsyncThunk("chat/fetchMessages", async (chatId: number, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.get<Message[]>(`/chats/${chatId}/messages`);
+    return response.data;
+  } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || "Ошибка загрузки сообщений");
   }
 });
@@ -98,12 +63,13 @@ const chatSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchChats.fulfilled, (state, action) => {
-      state.chats = action.payload;
-    });
-    builder.addCase(fetchMessages.fulfilled, (state, action) => {
-      state.messages = action.payload;
-    });
+    builder
+      .addCase(fetchChats.fulfilled, (state, action) => {
+        state.chats = action.payload;
+      })
+      .addCase(fetchMessages.fulfilled, (state, action) => {
+        state.messages = action.payload;
+      });
   },
 });
 

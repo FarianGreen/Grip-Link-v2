@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../services/api/axiosInstance";
 import { RootState } from "./store";
 
 interface User {
@@ -9,6 +9,7 @@ interface User {
   bio: string;
   role: "user" | "admin";
 }
+
 interface ProfileState {
   user: User | null;
   loading: boolean;
@@ -21,32 +22,20 @@ const initialState: ProfileState = {
   error: null,
 };
 
-export const updateProfile = createAsyncThunk(
-  "profile/update",
-  async (data: FormData, { rejectWithValue }) => {
-    try {
-      const response = await axios.put(
-        "http://localhost:5000/auth/profile/avatar",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Content-Type": "multipart/form-data", // Указываем тип контента
-          },
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Ошибка при обновлении профиля"
-      );
-    }
+export const updateProfile = createAsyncThunk("profile/update", async (data: FormData, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.put("/auth/profile/avatar", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Ошибка при обновлении профиля");
   }
-);
+});
 
 const profileSlice = createSlice({
   name: "profile",
-  initialState: initialState,
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder

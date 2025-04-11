@@ -83,7 +83,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       secure: false,
       sameSite: "lax",
     });
-    res.json({ accessToken, user: { id: user.id, name: user.name, email } });
+    res.json({ accessToken, user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Ошибка при входе в систему" });
