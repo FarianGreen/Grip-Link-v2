@@ -49,7 +49,7 @@ const HomePage = () => {
     dispatch(updateProfile(data)); // Отправляем с помощью redux
     handleEditToggle()
   };
-  console.log(user);
+
   useEffect(() => {
     if (user) {
       setFormData({

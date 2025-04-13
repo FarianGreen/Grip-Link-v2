@@ -45,7 +45,7 @@ export const setupWebSocket = (server: HttpServer): void => {
         const userRepo = AppDataSource.getRepository(User);
         const messageRepo = AppDataSource.getRepository(Message);
 
-        const chat = await chatRepo.findOne({ where: { id: chatId }, relations: ["users"] });
+        const chat = await chatRepo.findOne({ where: { chatId: chatId }, relations: ["users"] });
         if (!chat) {
           console.log(`❌ Чат ${chatId} не найден`);
           return;

@@ -5,7 +5,7 @@ import { Message } from "./Message";
 @Entity()
 export class Chat {
   @PrimaryGeneratedColumn()
-  id!: number;
+  chatId!: number;
 
   @ManyToMany(() => User, (user) => user.chats, { cascade: true })
   @JoinTable()

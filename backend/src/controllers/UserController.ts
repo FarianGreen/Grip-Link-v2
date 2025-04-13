@@ -4,6 +4,7 @@ import AppDataSource from "../data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Not } from "typeorm";
 
 interface DecodedToken {
   id: number;
@@ -105,8 +106,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       name: user.name,
       email: user.email,
       bio: user.bio,
-      role:user.role,
-      avatar:user.avatar
+      role: user.role,
+      avatar: user.avatar,
     });
   } catch (error) {
     console.error(error);
@@ -201,6 +202,24 @@ export const updateProfile = async (
     });
   } catch (err) {
     console.error("Ошибка при обновлении профиля:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const currentUserId = (req as any).user.id;
+
+    const userRepo = AppDataSource.getRepository(User);
+    const users = await userRepo.find({
+      where: { id: Not(currentUserId) },
+      select: ["id", "name", "email", "avatar", "role"],
+      order: { name: "ASC" },
+    });
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("❌ Ошибка при получении пользователей:", error);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };

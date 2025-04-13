@@ -7,6 +7,7 @@ import {
   refreshToken,
   logout,
   updateProfile,
+  getAllUsers,
 } from "../controllers/UserController";
 import { authMiddleware, isAdmin } from "../middleware/authMiddleware";
 import { uploadAvatar } from "../middleware/uploadAvatar";
@@ -30,6 +31,7 @@ router.post("/register", registerValidation, (req: Request, res: Response) =>
 );
 router.post("/login", login);
 router.get("/me", authMiddleware, getMe);
+router.get("/users", authMiddleware, getAllUsers);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
 router.put("/profile", authMiddleware, updateProfile);

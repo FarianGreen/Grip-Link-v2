@@ -13,6 +13,7 @@ interface User {
 
 interface AuthState {
   user: User | null;
+  users: User[];
   isLogined: boolean;
   loading: boolean;
   error: string | null;
@@ -20,6 +21,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
+  users: [],
   isLogined: Boolean(localStorage.getItem("accessToken")),
   loading: false,
   error: null,
@@ -87,12 +89,27 @@ export const refreshAccessToken = createAsyncThunk(
   }
 );
 
+export const fetchAllUsers = createAsyncThunk(
+  "auth/fetchAllUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/auth/users");
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка получения списка пользователей"
+      );
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
       state.user = null;
+      state.users = [];
       state.isLogined = false;
       localStorage.removeItem("accessToken");
     },
@@ -143,7 +160,13 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(
+        fetchAllUsers.fulfilled,
+        (state, action: PayloadAction<User[]>) => {
+          state.users = action.payload;
+        }
+      );
   },
 });
 

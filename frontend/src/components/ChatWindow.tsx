@@ -20,7 +20,11 @@ const ChatWindow: React.FC = () => {
 
   return (
     <div className="chat-window">
+      <div className="chat-window__tools">
       <h2>Чат #{selectedChatId ?? "не выбран"}</h2>
+      <button>Удалить чат</button>
+      </div>
+      
       <div className="messages">
         {messages.length === 0 ? (
           <p>Сообщений пока нет</p>

@@ -27,7 +27,7 @@ export const getChatMessages = async (
 
     const chatRepository = AppDataSource.getRepository(Chat);
     const chat = await chatRepository.findOne({
-      where: { id: chatId },
+      where: { chatId: chatId },
       relations: ["users"],
     });
 
@@ -45,7 +45,7 @@ export const getChatMessages = async (
 
     // Получаем сообщения из чата
     const messages = await AppDataSource.getRepository(Message).find({
-      where: { chat: { id: chatId } },
+      where: { chat: { chatId: chatId } },
       relations: ["sender", "receiver"],
       order: { createdAt: "ASC" },
     });
@@ -70,7 +70,7 @@ export const sendMessageToChat = async (req: AuthRequest, res: Response): Promis
 
     const chatRepository = AppDataSource.getRepository(Chat);
     const chat = await chatRepository.findOne({
-      where: { id: chatId },
+      where: { chatId: chatId },
       relations: ["users"],
     });
 
