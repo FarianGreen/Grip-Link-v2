@@ -64,12 +64,30 @@
   }
 
   .messages {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     overflow-y: auto;
     padding: $spacing-small;
     background: darken($background-color, 5%);
     border-radius: $border-radius;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  .messages-outer {
+    flex: 1;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-y: auto;
+    background: darken($background-color, 5%);
+    border-radius: $border-radius;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .messages-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
   }
 
   .message {
@@ -79,6 +97,7 @@
     max-width: 80%;
     word-break: break-word;
     transition: background-color $transition;
+    align-self: flex-start;
 
     &.sent {
       background: $primary-color;
