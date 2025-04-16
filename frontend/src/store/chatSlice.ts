@@ -13,6 +13,7 @@ interface Message {
   content: string;
   senderId: number;
   createdAt: string;
+  isRead?:boolean;
 }
 
 interface Chat {
@@ -33,41 +34,63 @@ const initialState: ChatState = {
   messages: [],
 };
 
-export const fetchChats = createAsyncThunk("chat/fetchChats", async (_, { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.get<Chat[]>("/chats");
-    return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Ошибка загрузки чатов");
+export const fetchChats = createAsyncThunk(
+  "chat/fetchChats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<Chat[]>("/chats");
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка загрузки чатов"
+      );
+    }
   }
-});
+);
 
-export const fetchMessages = createAsyncThunk("chat/fetchMessages", async (chatId: number, { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.get<Message[]>(`/chats/${chatId}/messages`);
-    return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Ошибка загрузки сообщений");
+export const fetchMessages = createAsyncThunk(
+  "chat/fetchMessages",
+  async (chatId: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<Message[]>(
+        `/chats/${chatId}/messages`
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка загрузки сообщений"
+      );
+    }
   }
-});
+);
 
-export const createChat = createAsyncThunk("chats/create", async (userIds: number[], { rejectWithValue }) => {
-  try {
-    const response = await axiosInstance.post("/chats", { userIds });
-    return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Ошибка при создании чата");
+export const createChat = createAsyncThunk(
+  "chats/create",
+  async (userIds: number[], { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/chats", {userIds});
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка при создании чата"
+      );
+    }
   }
-});
+);
 
-export const deleteChat = createAsyncThunk("chats/delete", async (chatId: number, { rejectWithValue }) => {
-  try {
-    await axiosInstance.delete(`/chats/${chatId}`);
-    return chatId;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Ошибка при удалении чата");
+export const deleteChat = createAsyncThunk(
+  "chats/delete",
+  async (chatId: number, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`/chats/${chatId}`);
+      return chatId;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка при удалении чата"
+      );
+    }
   }
-});
+);
 
 const chatSlice = createSlice({
   name: "chat",
@@ -92,8 +115,11 @@ const chatSlice = createSlice({
         state.chats.push(action.payload);
       })
       .addCase(deleteChat.fulfilled, (state, action: PayloadAction<number>) => {
-        state.chats = state.chats.filter(chat => chat.chatId !== action.payload);
-        if (state.selectedChatId === action.payload) state.selectedChatId = null;
+        state.chats = state.chats.filter(
+          (chat) => chat.chatId !== action.payload
+        );
+        if (state.selectedChatId === action.payload)
+          state.selectedChatId = null;
       });
   },
 });

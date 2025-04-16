@@ -13,19 +13,21 @@ export const getUserChatsWithLastMessages = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    res.status(401).json({ message: "Пользователь не авторизован" });
+    return;
+  }
+
   try {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      res.status(401).json({ message: "Пользователь не авторизован" });
-      return;
-    }
-
-    const chatRepo = AppDataSource.getRepository(Chat);
-    const chats = await chatRepo.find({
-      where: { users: { id: userId } },
-      relations: ["users"],
-    });
+    // 1. Получаем все чаты пользователя (включая всех участников)
+    const chats = await AppDataSource.getRepository(Chat)
+      .createQueryBuilder("chat")
+      .innerJoin("chat.users", "user") // текущий пользователь
+      .leftJoinAndSelect("chat.users", "allUsers") // все пользователи чата
+      .where("user.id = :userId", { userId })
+      .getMany();
 
     if (!chats.length) {
       res.json([]);
@@ -34,24 +36,38 @@ export const getUserChatsWithLastMessages = async (
 
     const chatIds = chats.map((chat) => chat.chatId);
 
-    const lastMessages = await AppDataSource.getRepository(Message)
+    // 2. Получаем последние сообщения по каждому чату
+    const subQuery = AppDataSource.getRepository(Message)
+      .createQueryBuilder("sub")
+      .select("DISTINCT ON (sub.chatId) sub.id", "id")
+      .addSelect("sub.chatId", "chatId")
+      .orderBy("sub.chatId")
+      .addOrderBy("sub.createdAt", "DESC");
+
+    const lastMessagesRaw = await AppDataSource.getRepository(Message)
       .createQueryBuilder("message")
-      .where("message.chatId IN (:...chatIds)", { chatIds })
-      .orderBy("message.chatId", "ASC")
-      .addOrderBy("message.createdAt", "DESC")
-      .distinctOn(["message.chatId"])
+      .innerJoin("(" + subQuery.getQuery() + ")", "latest", "message.id = latest.id")
+      .leftJoinAndSelect("message.sender", "sender")
+      .setParameters(subQuery.getParameters())
       .getMany();
 
+    // 3. Собираем данные
     const formattedChats = chats.map((chat) => {
-      const lastMessage = lastMessages.find(
+      const lastMessage = lastMessagesRaw.find(
         (msg) => msg.chat?.chatId === chat.chatId
       );
 
       return {
         chatId: chat.chatId,
-        users: chat.users?.map(({ id, name, email }) => ({ id, name, email })),
+        users: chat.users.map(({ id, name, email, avatar }) => ({
+          id,
+          name,
+          email,
+          avatar,
+        })),
         lastMessage: lastMessage?.content || null,
         lastMessageTime: lastMessage?.createdAt || null,
+        sender: lastMessage?.sender || null,
       };
     });
 
@@ -61,6 +77,7 @@ export const getUserChatsWithLastMessages = async (
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
+
 
 export const createChat = async (
   req: AuthRequest,
@@ -109,7 +126,7 @@ export const createChat = async (
       .getOne();
 
     if (existingChat) {
-      res.json(existingChat);
+      // res.json(existingChat);
       return;
     }
 

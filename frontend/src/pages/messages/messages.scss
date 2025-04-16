@@ -111,6 +111,10 @@
       align-self: flex-start;
     }
   }
+  .message.sent.unread {
+    font-weight: bold;
+    background: lighten($card-background, 10%);
+  }
 }
 
 .message-input {

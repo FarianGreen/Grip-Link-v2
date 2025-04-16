@@ -27,7 +27,7 @@ export const getChatMessages = async (
 
     const chatRepository = AppDataSource.getRepository(Chat);
     const chat = await chatRepository.findOne({
-      where: { chatId: chatId },
+      where: { chatId },
       relations: ["users"],
     });
 
@@ -36,19 +36,23 @@ export const getChatMessages = async (
       return;
     }
 
-    // Проверяем, состоит ли пользователь в этом чате
     const isMember = chat.users.some((user) => user.id === userId);
     if (!isMember) {
       res.status(403).json({ message: "Нет доступа к этому чату" });
       return;
     }
 
-    // Получаем сообщения из чата
-    const messages = await AppDataSource.getRepository(Message).find({
-      where: { chat: { chatId: chatId } },
-      relations: ["sender", "receiver"],
-      order: { createdAt: "ASC" },
-    });
+    const messages = await AppDataSource.getRepository(Message)
+      .createQueryBuilder("message")
+      .leftJoin("message.sender", "sender")
+      .leftJoin("message.receiver", "receiver")
+      .addSelect([
+        "sender.id", "sender.name", "sender.email", "sender.avatar",
+        "receiver.id", "receiver.name", "receiver.email", "receiver.avatar"
+      ])
+      .where("message.chatId = :chatId", { chatId })
+      .orderBy("message.createdAt", "ASC")
+      .getMany();
 
     res.json(messages);
   } catch (error) {
@@ -57,7 +61,10 @@ export const getChatMessages = async (
   }
 };
 
-export const sendMessageToChat = async (req: AuthRequest, res: Response): Promise<void> => {
+export const sendMessageToChat = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
     const chatId = parseInt(req.params.chatId);
     const senderId = req.user?.id;

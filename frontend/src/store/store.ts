@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import chatReducer, { addMessage } from "./chatSlice";
 import authReducer from "./authSlice";
-import { connectSocket, getSocket } from "../services/socket";
+import { initSocket } from "../services/socket";
 import { notificationReducer } from "./notificationsSlice";
 import profileReducer from "./profileSlice";
 
@@ -18,8 +18,8 @@ const store = configureStore({
     }),
 });
 
-connectSocket();
-const socket = getSocket();
+// initSocket();
+const socket = initSocket();
 
 if (socket) {
   socket.on("newMessage", (message) => {

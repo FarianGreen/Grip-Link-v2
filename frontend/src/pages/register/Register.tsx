@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../../store/authSlice";
 import { AppDispatch, RootState } from "../../store/store";
+import { Path } from "../../constants/Path";
 
 const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -24,7 +25,7 @@ const Register: React.FC = () => {
     e.preventDefault();
     const result = await dispatch(registerUser(formData));
     if (registerUser.fulfilled.match(result)) {
-      navigate("/chats");
+      navigate(Path.home);
     }
   };
 

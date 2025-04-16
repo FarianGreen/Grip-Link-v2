@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../store/store";
 import { fetchMessages } from "../store/chatSlice";
 import MessageInput from "./MessageInput";
-import { connectSocket } from "../services/socket";
+import { initSocket } from "../services/socket";
 
 const ChatWindow: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -13,9 +13,14 @@ const ChatWindow: React.FC = () => {
   );
 
   useEffect(() => {
-    connectSocket();
-    if (selectedChatId !== null) {
+    const socket = initSocket();
+
+    if (selectedChatId !== null && currentUserId) {
       dispatch(fetchMessages(selectedChatId));
+      socket.emit("markAsRead", {
+        chatId: selectedChatId,
+        userId: currentUserId,
+      });
     }
   }, [dispatch, selectedChatId]);
 
@@ -31,16 +36,21 @@ const ChatWindow: React.FC = () => {
         ) : (
           <div className="messages-outer">
             <div className="messages-inner">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`message ${
-                    msg.sender.id === currentUserId ? "sent" : "received"
-                  }`}
-                >
-                  <strong>{msg.sender.name}:</strong> {msg.content}
-                </div>
-              ))}
+              {messages.map((msg) => {
+                const isSentByMe = msg.sender.id === currentUserId;
+                // const isUnread = msg.isRead && isSentByMe;
+
+                return (
+                  <div
+                    key={msg.id}
+                    className={`message ${isSentByMe ? "sent" : "received"} ${
+                      !msg.isRead ? "unread" : ""
+                    }`}
+                  >
+                    <strong>{msg.sender.name}:</strong> {msg.content}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

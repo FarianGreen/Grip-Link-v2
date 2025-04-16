@@ -16,6 +16,7 @@ const ChatList: React.FC = () => {
     (state: RootState) => state.chat.selectedChatId
   );
   const users = useSelector((state: RootState) => state.auth.users);
+  const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
 
   useEffect(() => {
     dispatch(fetchChats());
@@ -23,7 +24,8 @@ const ChatList: React.FC = () => {
   }, [dispatch]);
 
   const handleCreateChat = (userId: number) => {
-    dispatch(createChat([userId]));
+    if (!currentUserId) return;
+    dispatch(createChat([userId, currentUserId]));
   };
 
   const handleDeleteChat = (chatId: number) => {
