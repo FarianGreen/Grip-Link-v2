@@ -4,28 +4,5 @@
 .login-container {
   @include flex-center(column);
   height: 100vh;
-
-  // .login-card {
-  //   background-color: rgba(255, 255, 255, 0.822);
-  //   padding: 40px;
-  //   border-radius: $border-radius;
-  //   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  //   width: 100%;
-  //   max-width: 400px;
-
-  //   h2 {
-  //     text-align: center;
-  //     margin-bottom: 20px;
-  //     color: $primary-color;
-  //   }
-  //   .error {
-  //     user-select: none;
-  //     margin-top: 0.5rem;
-  //     color: $error-color;
-  //   }
-  //   .login-button {
-  //     @include button($primary-color);
-  //     width: 100%;
-  //   }
-  // }
+  animation: fadeInUp 0.6s ease-out both;
 }

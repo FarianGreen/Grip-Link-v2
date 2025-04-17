@@ -4,4 +4,5 @@
 .auth-container {
   @include flex-center(column);
   height: 100vh;
+  animation: fadeInUp 0.6s ease-out both;
 }
