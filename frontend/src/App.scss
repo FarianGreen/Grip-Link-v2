@@ -2,15 +2,183 @@
 @import "./assets/styles/mixins";
 .layout {
   display: flex;
-  height:calc(100vh - $header-height); 
-  overflow: hidden; 
+  height: calc(100vh - $header-height);
+  overflow: hidden;
 }
 .outlet {
   flex: 1;
   display: flex;
   flex-direction: column;
   height: calc(100vh - $header-height);
-  overflow-y: auto; 
+  overflow-y: auto;
   padding: 20px;
 }
+.from-link {
+  text-align: center;
+  margin-top: 10px;
+  color: $text-dark;
 
+  a {
+    position: relative;
+    color: $secondary-color;
+    text-decoration: none;
+    display: inline-block;
+    padding-right: 18px; // место для стрелки
+    transition: color 0.3s ease;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    &::after {
+      content: "➜"; // можно заменить на '➜' или иконку
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    &:hover {
+      color: darken($secondary-color, 10%);
+      text-decoration: underline;
+
+      &::after {
+        transform: translateY(-50%) translateX(4px);
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.animation-card {
+  .card-content {
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    width: 100%;
+    width: 400px;
+  }
+  // 🌪 Вращающаяся аура
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30%;
+    height: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #ae00ff88,
+      #187e3fa4,
+      #00ffcc9f,
+      #0b448f,
+      #ff00cc
+    );
+    filter: blur(50px);
+    opacity: 0.9;
+    animation: spin 8s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+  // 🌈 Симуляция цветного box-shadow через ::after
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 25%;
+    height: 60%;
+    transform: translate(-50%, -50%);
+    animation: pulse 3s ease-in-out infinite alternate;
+    transition: box-shadow 0.3s ease;
+    border-radius: 12px;
+    background: radial-gradient(
+      circle at center,
+      #b20ffdc9 0%,
+      #187e3fa4 25%,
+      #00ffcc9f 50%,
+      #0b448f 75%,
+      #a01b85 100%
+    );
+    filter: blur(30px);
+    opacity: 1;
+    z-index: -2;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  h2 {
+    color: $primary-color;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  input {
+    padding: 12px;
+    border: 1px solid lighten($border-color, 50%);
+    border-radius: $border-radius;
+    outline: none;
+    font-size: 16px;
+    transition: $transition;
+    width: 100%;
+    margin-bottom: 16px;
+
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 5px rgba($primary-color, 0.5);
+    }
+  }
+
+  button {
+    @include button($primary-color);
+    font-size: 16px;
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+.error {
+  color: $error-color;
+  font-size: 14px;
+  background: lighten($error-color, 40%);
+  padding: 8px;
+  border-radius: $border-radius;
+  margin-bottom: 10px;
+}
+
+a {
+  color: $secondary-color;
+  text-decoration: none;
+  font-weight: bold;
+  transition: $transition;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Анимации
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}

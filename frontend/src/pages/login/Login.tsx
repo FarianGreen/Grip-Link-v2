@@ -1,60 +1,67 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./login.scss";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../store/authSlice";
 import { AppDispatch, RootState } from "../../store/store";
-import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../store/authSlice";
+import { useNavigate, Link } from "react-router-dom";
 import { Path } from "../../constants/Path";
-import { Link } from "react-router-dom";
+import { loginSchema, LoginSchemaType } from "../../shared/loginSchema";
+import FormInput from "../../components/formInput/FormInput";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
-  const { isLogined } = useSelector((state: RootState) => state.auth);
+  const { loading, error, isLogined } = useSelector(
+    (state: RootState) => state.auth
+  );
   const navigate = useNavigate();
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(loginUser({ email, password }));
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = (data: LoginSchemaType) => {
+    dispatch(loginUser(data));
   };
+
   useEffect(() => {
     if (isLogined) {
       navigate(Path.home);
     }
   }, [isLogined]);
+
   return (
     <div className="login-container">
-      <div className="login-card">
-        <h2>Вход</h2>
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <label>Email</label>
-            <input
+      <div className="animation-card">
+        <div className="card-content">
+          <h2>Вход</h2>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <FormInput
+              label="Email"
               type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              {...register("email")}
+              error={errors.email}
             />
-          </div>
-          <div className="input-group">
-            <label>Пароль</label>
-            <input
+            <FormInput
+              label="Пароль"
               type="password"
-              placeholder="Пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
+              error={errors.password}
             />
-          </div>
-          <button className="login-button" type="submit" disabled={loading}>
-            {loading ? "Загрузка..." : "Войти"}
-          </button>
-          {error && <p className="error">{error}</p>}
-        </form>
-        <p className="register-link">
-          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-        </p>
+            <button className="login-button" type="submit" disabled={loading}>
+              {loading ? "Загрузка..." : "Войти"}
+            </button>
+            {error && <p className="error">{error}</p>}
+          </form>
+          <p className="from-link">
+            Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
