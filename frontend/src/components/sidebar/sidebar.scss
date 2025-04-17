@@ -2,7 +2,7 @@
 
 .navbar {
   height: 100vh;
-  background-color: $sidebar-background;
+  background-color: $background;
   padding: $spacing-medium;
   display: flex;
   flex-direction: column;
@@ -12,7 +12,7 @@
 
 
   &__item {
-    background-color: darken($card-background, 5%);
+    background-color: darken($background, 5%);
     border: 1px solid $border-color;
     display: flex;
     align-items: center;
@@ -25,6 +25,7 @@
     transition: background-color $transition;
 
     &:hover {
+      text-decoration: none;
       background-color: lighten($card-background, 25%);
     }
   }

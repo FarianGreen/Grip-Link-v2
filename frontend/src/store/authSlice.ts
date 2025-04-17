@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../services/api/axiosInstance";
 import { RootState } from "./store";
+import { showNotification } from "./notificationsSlice";
 
 interface User {
   bio: string;
@@ -48,11 +49,12 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (
     credentials: { email: string; password: string },
-    { rejectWithValue }
+    { dispatch, rejectWithValue }
   ) => {
     try {
       const response = await axiosInstance.post("/auth/login", credentials);
       localStorage.setItem("accessToken", response.data.accessToken);
+      dispatch(showNotification({ message: "✅ Вы вошли!", type: "success" }));
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

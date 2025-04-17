@@ -38,7 +38,6 @@ const ChatWindow: React.FC = () => {
             <div className="messages-inner">
               {messages.map((msg) => {
                 const isSentByMe = msg.sender.id === currentUserId;
-                // const isUnread = msg.isRead && isSentByMe;
 
                 return (
                   <div

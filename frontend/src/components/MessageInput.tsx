@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { initSocket } from "../services/socket";
 import { addMessage } from "../store/chatSlice";
-import { addNotification } from "../store/notificationsSlice";
+import { showNotification } from "../store/notificationsSlice";
 
 const MessageInput: React.FC = () => {
   const [message, setMessage] = useState("");
@@ -43,7 +43,7 @@ const MessageInput: React.FC = () => {
     setMessage("");
   };
   const handleClick = () => {
-    dispatch(addNotification({ message: "✅ Всё работает!", type: "success" }));
+    dispatch(showNotification({ message: "✅ Всё работает!", type: "success" }));
   };
 
   return (

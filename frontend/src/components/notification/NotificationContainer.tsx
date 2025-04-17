@@ -2,28 +2,29 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import "./notification.scss";
-import { removeNotification } from "../../store/notificationsSlice";
+import { clearNotification } from "../../store/notificationsSlice";
 
-export const NotificationContainer = () => {
+export const Notification: React.FC = () => {
   const dispatch = useDispatch();
-  const notifications = useSelector(
-    (state: RootState) => state.notifications.notifications
+  const { message, type } = useSelector(
+    (state: RootState) => state.notifications
   );
 
   useEffect(() => {
-    const timers = notifications.map((n) =>
-      setTimeout(() => dispatch(removeNotification(n.id)), 3000)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [notifications, dispatch]);
+    if (message) {
+      const timer = setTimeout(() => dispatch(clearNotification()), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, dispatch]);
+
+  if (!message) return null;
 
   return (
     <div className="notification-container">
-      {notifications.map((n) => (
-        <div key={n.id} className={`notification ${n.type || "info"}`}>
-          {n.message}
-        </div>
-      ))}
+      <div className={`notification ${type || "info"}`}>
+        <span>{message}</span>
+        <button onClick={() => dispatch(clearNotification())}>×</button>
+      </div>
     </div>
   );
 };

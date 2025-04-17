@@ -9,7 +9,7 @@
 
 .chat-list {
   width: 15vw;
-  background-color: $sidebar-background;
+  background-color: $background;
   border-right: 1px solid $border-color;
   padding: $spacing-small;
   overflow-y: auto;
@@ -27,11 +27,11 @@
     transition: background-color $transition;
     border-radius: 5px;
     margin-bottom: 5px;
-    background-color: $card-background;
+    background-color: $background;
     color: $text-primary;
 
     &:hover {
-      background-color: lighten($card-background, 5%);
+      background-color: lighten($background, 5%);
     }
 
     &.active {
@@ -106,14 +106,14 @@
     }
 
     &.received {
-      background: darken($card-background, 10%);
+      background: darken($background, 10%);
       color: $text-primary;
       align-self: flex-start;
     }
   }
   .message.sent.unread {
     font-weight: bold;
-    background: lighten($card-background, 10%);
+    background: lighten($background, 10%);
   }
 }
 
@@ -121,7 +121,7 @@
   display: flex;
   padding: 10px;
   border-top: 1px solid $border-color;
-  background-color: $sidebar-background;
+  background-color: $background;
 
   input {
     flex: 1;

@@ -1,33 +1,35 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from "uuid";
 
-type Notification = {
-  id: string;
-  message: string;
-  type?: "success" | "error" | "info";
-};
+type NotificationType = "success" | "error" | "info";
 
 interface NotificationState {
-  notifications: Notification[];
+  message: string | null;
+  type: NotificationType | null;
 }
 
 const initialState: NotificationState = {
-  notifications: [],
+  message: null,
+  type: null,
 };
 
 const notificationSlice = createSlice({
-  name: "notifications",
+  name: "notification",
   initialState,
   reducers: {
-    addNotification: (state, action: PayloadAction<Omit<Notification, "id">>) => {
-      const newNotification = { ...action.payload, id: uuidv4() };
-      state.notifications.push(newNotification);
+    showNotification: (
+      state,
+      action: PayloadAction<{ message: string; type?: NotificationType }>
+    ) => {
+      state.message = action.payload.message;
+      state.type = action.payload.type || "info";
     },
-    removeNotification: (state, action: PayloadAction<string>) => {
-      state.notifications = state.notifications.filter(n => n.id !== action.payload);
+    clearNotification: (state) => {
+      state.message = null;
+      state.type = null;
     },
   },
 });
 
-export const { addNotification, removeNotification } = notificationSlice.actions;
+export const { showNotification, clearNotification } =
+  notificationSlice.actions;
 export const notificationReducer = notificationSlice.reducer;
