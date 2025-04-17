@@ -4,7 +4,7 @@ import "./header.scss";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store/store";
-import { logout } from "../../store/authSlice";
+import { logoutUser } from "../../store/authSlice";
 
 export const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
@@ -13,7 +13,7 @@ export const Header = () => {
     setActiveItem(path);
   };
   const handleLogOut = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
   };
   return (
     <section className="header">

@@ -62,6 +62,21 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      await axiosInstance.post("/auth/logout");
+      localStorage.removeItem("accessToken");
+      dispatch(logout());
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка при выходе из системы"
+      );
+    }
+  }
+);
+
 export const fetchUser = createAsyncThunk(
   "auth/fetchUser",
   async (_, { rejectWithValue }) => {
@@ -130,6 +145,16 @@ const authSlice = createSlice({
       )
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isLogined = false;
+        state.users = [];
+        state.error = null;
+        state.loading = false;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload as string;
       })
       .addCase(fetchUser.fulfilled, (state, action: PayloadAction<User>) => {

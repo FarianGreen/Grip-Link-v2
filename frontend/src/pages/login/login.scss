@@ -42,8 +42,13 @@
           box-shadow: 0 0 5px rgba($primary-color, 0.5);
         }
       }
-    }
 
+    }
+    .error{
+      user-select: none;
+      margin-top: 0.5rem;
+      color: $error-color;
+    }
     .login-button {
       @include button($primary-color);
       width: 100%;
@@ -57,9 +62,16 @@
         color: $secondary-color;
         text-decoration: none;
         transition: $transition;
+        display: inline-block;
+        will-change: transform;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        transform-origin: center center;
 
         &:hover {
           text-decoration: underline;
+          transform: scale(1.05);
         }
       }
     }
