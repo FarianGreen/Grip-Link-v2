@@ -4,7 +4,12 @@ import AppDataSource from "../data-source";
 import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Not } from "typeorm";
 
+interface DecodedToken {
+  id: number;
+  role: "user" | "admin";
+}
 const userRepository = AppDataSource.getRepository(User);
 
 const generateTokens = (userId: number, role?: "user" | "admin") => {
@@ -44,11 +49,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const newUser = userRepository.create({ name, email, passwordHash, role });
     await userRepository.save(newUser);
 
-    const token = jwt.sign({ id: newUser.id, role: newUser.role }, "secret", { expiresIn: "30d" });
+    const token = jwt.sign({ id: newUser.id, role: newUser.role }, "secret", {
+      expiresIn: "30d",
+    });
 
-    res
-      .status(201)
-      .json({ token, user: { id: newUser.id, name, email, role:newUser.role } });
+    res.status(201).json({
+      token,
+      user: { id: newUser.id, name, email, role: newUser.role },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка регистрации" });
@@ -73,20 +81,19 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
     });
-    res.json({ accessToken, user: { id: user.id, name: user.name, email } });
+    res.json({ accessToken, user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Ошибка при входе в систему" });
   }
 };
 
-// Получение информации о себе
 export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.body.userId;
+    const userId = (req as any).user?.id;
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -94,7 +101,14 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({ id: user.id, name: user.name, email: user.email });
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      role: user.role,
+      avatar: user.avatar,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка при получении данных" });
@@ -112,7 +126,7 @@ export const refreshToken = async (
   }
 
   try {
-    const decoded: any = jwt.verify(refreshToken, "refreshSecret");
+    const decoded = jwt.verify(refreshToken, "refreshSecret") as DecodedToken;
     const user = await userRepository.findOne({
       where: { id: decoded.id, refreshToken },
     });
@@ -135,11 +149,10 @@ export const refreshToken = async (
     });
     res.json({ accessToken });
   } catch {
-    res.status(403).json({ message: "Ошибка refresh токена" });
+    res.status(403).json({ message: "Неверный refresh токен" });
   }
 };
 
-// Выход из системы (удаление refreshToken)
 export const logout = async (req: Request, res: Response): Promise<void> => {
   const { refreshToken } = req.cookies;
   if (!refreshToken) {
@@ -155,4 +168,58 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
   res.clearCookie("refreshToken");
   res.json({ message: "Вы вышли из системы" });
+};
+
+export const updateProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).user?.id;
+  console.log(req);
+  if (!userId) {
+    res.status(401).json({ message: "Неавторизован" });
+    return;
+  }
+
+  try {
+    const user = await userRepository.findOneBy({ id: userId });
+    if (!user) {
+      res.status(404).json({ message: "Пользователь не найден" });
+      return;
+    }
+
+    const { name, bio } = req.body;
+
+    if (name) user.name = name;
+    if (bio !== undefined) user.bio = bio;
+
+    await userRepository.save(user);
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+    });
+  } catch (err) {
+    console.error("Ошибка при обновлении профиля:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const currentUserId = (req as any).user.id;
+
+    const userRepo = AppDataSource.getRepository(User);
+    const users = await userRepo.find({
+      where: { id: Not(currentUserId) },
+      select: ["id", "name", "email", "avatar", "role"],
+      order: { name: "ASC" },
+    });
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("❌ Ошибка при получении пользователей:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
 };

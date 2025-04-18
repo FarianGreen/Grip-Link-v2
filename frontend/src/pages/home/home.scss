@@ -1,0 +1,90 @@
+@import "../../assets/styles/variables";
+.profile {
+  display: flex;
+  justify-content: center;
+  padding: $spacing-large;
+
+  &__card {
+    background-color: $background;
+    border: 1px solid $border-color;
+    padding: $spacing-large;
+    border-radius: $border-radius;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: $box-shadow-medium;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: $spacing-medium;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__info {
+    text-align: center;
+
+    & > * {
+      margin-bottom: $spacing-small;
+    }
+  }
+
+  &__name {
+    font-size: 1.5rem;
+    color: $text-primary;
+  }
+
+  &__email,
+  &__bio {
+    color: $text-secondary;
+  }
+
+  &__actions {
+    margin-top: $spacing-medium;
+  }
+
+  &__edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+
+    input,
+    textarea {
+      padding: 10px;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      font-family: $font-family;
+      background-color: $background-color;
+      color: $text-primary;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+  }
+
+  &__edit-btn {
+    background-color: $primary-color;
+    color: black;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: $border-radius;
+    cursor: pointer;
+    transition: background-color $transition;
+
+    &:hover {
+      background-color: lighten($primary-color, 10%);
+    }
+  }
+}

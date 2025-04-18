@@ -1,0 +1,42 @@
+@import "variables";
+@import "mixins";
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: $background-color;
+  color: $text-primary;
+  font-family: $font-family;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  border-radius: $border-radius;
+  border: none;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  background-color: $primary-color;
+  color: white;
+  cursor: pointer;
+  transition: background-color $transition;
+
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}

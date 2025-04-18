@@ -2,13 +2,83 @@ import { Request, Response } from "express";
 import AppDataSource from "../data-source";
 import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
+import { Message } from "../entities/Message";
+import { In } from "typeorm";
 
-// Определяем интерфейс для расширенного Request с `user`
 interface AuthRequest extends Request {
   user?: { id: number };
 }
 
-// 🔹 Создание чата (если его ещё нет)
+export const getUserChatsWithLastMessages = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    res.status(401).json({ message: "Пользователь не авторизован" });
+    return;
+  }
+
+  try {
+    // 1. Получаем все чаты пользователя (включая всех участников)
+    const chats = await AppDataSource.getRepository(Chat)
+      .createQueryBuilder("chat")
+      .innerJoin("chat.users", "user") // текущий пользователь
+      .leftJoinAndSelect("chat.users", "allUsers") // все пользователи чата
+      .where("user.id = :userId", { userId })
+      .getMany();
+
+    if (!chats.length) {
+      res.json([]);
+      return;
+    }
+
+    const chatIds = chats.map((chat) => chat.chatId);
+
+    // 2. Получаем последние сообщения по каждому чату
+    const subQuery = AppDataSource.getRepository(Message)
+      .createQueryBuilder("sub")
+      .select("DISTINCT ON (sub.chatId) sub.id", "id")
+      .addSelect("sub.chatId", "chatId")
+      .orderBy("sub.chatId")
+      .addOrderBy("sub.createdAt", "DESC");
+
+    const lastMessagesRaw = await AppDataSource.getRepository(Message)
+      .createQueryBuilder("message")
+      .innerJoin("(" + subQuery.getQuery() + ")", "latest", "message.id = latest.id")
+      .leftJoinAndSelect("message.sender", "sender")
+      .setParameters(subQuery.getParameters())
+      .getMany();
+
+    // 3. Собираем данные
+    const formattedChats = chats.map((chat) => {
+      const lastMessage = lastMessagesRaw.find(
+        (msg) => msg.chat?.chatId === chat.chatId
+      );
+
+      return {
+        chatId: chat.chatId,
+        users: chat.users.map(({ id, name, email, avatar }) => ({
+          id,
+          name,
+          email,
+          avatar,
+        })),
+        lastMessage: lastMessage?.content || null,
+        lastMessageTime: lastMessage?.createdAt || null,
+        sender: lastMessage?.sender || null,
+      };
+    });
+
+    res.json(formattedChats);
+  } catch (error) {
+    console.error("Ошибка при получении чатов:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+
 export const createChat = async (
   req: AuthRequest,
   res: Response
@@ -29,14 +99,15 @@ export const createChat = async (
       return;
     }
 
-    // Добавляем текущего пользователя, если его нет в `userIds`
     if (!userIds.includes(currentUserId)) {
       userIds.push(currentUserId);
     }
 
-    // Получаем пользователей из базы данных
     const userRepo = AppDataSource.getRepository(User);
-    const users = await userRepo.findByIds(userIds);
+    const users = await userRepo.find({
+      select: ["id", "name", "email", "avatar", "bio", "role"],
+      where: { id: In(userIds) },
+    });
 
     if (users.length !== userIds.length) {
       res
@@ -45,22 +116,20 @@ export const createChat = async (
       return;
     }
 
-    // Проверяем, существует ли уже чат с таким же набором пользователей
     const chatRepo = AppDataSource.getRepository(Chat);
     const existingChat = await chatRepo
       .createQueryBuilder("chat")
       .innerJoin("chat.users", "user")
       .where("user.id IN (:...userIds)", { userIds })
-      .groupBy("chat.id")
+      .groupBy("chat.chatId")
       .having("COUNT(user.id) = :count", { count: userIds.length })
       .getOne();
 
     if (existingChat) {
-      res.json(existingChat);
+      // res.json(existingChat);
       return;
     }
 
-    // Создаём новый чат
     const newChat = chatRepo.create({ users });
     await chatRepo.save(newChat);
 
@@ -71,7 +140,46 @@ export const createChat = async (
   }
 };
 
-// 🔹 Получение всех чатов пользователя
+export const deleteChat = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  const chatId = Number(req.params.chatId);
+
+  if (!req.user) {
+    res.status(401).json({ message: "Неавторизован" });
+    return;
+  }
+
+  try {
+    const chatRepository = AppDataSource.getRepository(Chat);
+
+    const chat = await chatRepository.findOne({
+      where: { chatId: chatId },
+      relations: ["users"],
+    });
+
+    if (!chat) {
+      res.status(404).json({ message: "Чат не найден" });
+      return;
+    }
+
+    const isParticipant = chat.users.some((user) => user.id === req.user!.id);
+
+    if (!isParticipant) {
+      res.status(403).json({ message: "Нет доступа к этому чату" });
+      return;
+    }
+
+    await chatRepository.remove(chat);
+
+    res.status(200).json({ message: "Чат удален" });
+  } catch (error) {
+    console.error("Ошибка при удалении чата:", error);
+    res.status(500).json({ message: "Ошибка при удалении чата" });
+  }
+};
+
 export const getUserChats = async (
   req: AuthRequest,
   res: Response
@@ -86,7 +194,7 @@ export const getUserChats = async (
 
     const chats = await AppDataSource.getRepository(Chat).find({
       where: { users: { id: userId } },
-      relations: ["users", "messages"], // Загружаем связанные данные
+      relations: ["users", "messages"],
     });
 
     res.json(chats);

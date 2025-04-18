@@ -6,8 +6,12 @@ import {
   getMe,
   refreshToken,
   logout,
+  updateProfile,
+  getAllUsers,
 } from "../controllers/UserController";
 import { authMiddleware, isAdmin } from "../middleware/authMiddleware";
+import { uploadAvatar } from "../middleware/uploadAvatar";
+import { updateAvatar } from "../controllers/AuthController";
 
 const router: Router = express.Router();
 
@@ -22,16 +26,21 @@ const registerValidation: ValidationChain[] = [
     .withMessage("Пароль должен содержать минимум 6 символов"),
 ];
 
-
 router.post("/register", registerValidation, (req: Request, res: Response) =>
   register(req, res)
 );
-router.post("/login", (req: Request, res: Response) => login(req, res));
-router.get("/me", authMiddleware, (req: Request, res: Response) =>
-  getMe(req, res)
-);
+router.post("/login", login);
+router.get("/me", authMiddleware, getMe);
+router.get("/users", authMiddleware, getAllUsers);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
+router.put("/profile", authMiddleware, updateProfile);
+router.put(
+  "/profile/avatar",
+  authMiddleware,
+  uploadAvatar.single("avatar"),
+  updateAvatar
+);
 
 router.post("/admin-only", authMiddleware, isAdmin, (req, res) => {
   res.json({ message: "Только для админов" });

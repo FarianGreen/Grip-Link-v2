@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToMany,
+} from "typeorm";
 import { Message } from "./Message";
 import { Chat } from "./Chat";
 
@@ -15,6 +21,12 @@ export class User {
 
   @Column()
   passwordHash!: string;
+
+  @Column({ type: "text", nullable: true })
+  bio?: string;
+
+  @Column({ nullable: true })
+  avatar?: string;
 
   @Column({ nullable: true })
   refreshToken?: string;

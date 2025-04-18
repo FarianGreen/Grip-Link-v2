@@ -1,0 +1,30 @@
+@import "../../assets/styles/variables";
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid lighten($text-dark, 50%);
+      border-radius: $border-radius;
+      outline: none;
+      transition: $transition;
+
+      &:focus {
+        border-color: $primary-color;
+        box-shadow: 0 0 5px rgba($primary-color, 0.5);
+      }
+    }
+
+  }
+  .input-error{
+    user-select: none;
+    color: $error-color;
+  }

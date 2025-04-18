@@ -18,17 +18,23 @@
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.2",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
     "tsconfig-paths": "^4.2.0",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.13.5",
+    "@types/socket.io": "^3.0.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"

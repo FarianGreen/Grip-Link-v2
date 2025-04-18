@@ -1,9 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-// Создаем интерфейс для расширения стандартного Request
+export interface AuthUser {
+  id: number;
+  role: "user" | "admin";
+}
 interface AuthRequest extends Request {
-  user?: { id: number; role: "user" | "admin" }; 
+  user?: AuthUser;
 }
 
 interface DecodedToken {
@@ -17,7 +20,6 @@ export const authMiddleware = (
   next: NextFunction
 ): void => {
   const token = req.header("Authorization");
-
   if (!token) {
     res.status(401).json({ message: "Нет доступа" });
     return;
@@ -31,7 +33,7 @@ export const authMiddleware = (
     }
 
     const decoded = jwt.verify(tokenParts[1], "secret") as DecodedToken;
-    req.user = { id: decoded.id, role: decoded.role }; 
+    req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch (error) {
     res.status(401).json({ message: "Неверный токен" });

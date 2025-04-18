@@ -1,0 +1,70 @@
+@import "../../assets/styles/variables";
+@import "../../assets/styles/mixins";
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  height: 60px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    $primary-color,
+    darken($primary-color, 25%)
+  );
+  color: $text-primary;
+  box-shadow: $box-shadow-light;
+  padding: 0 $spacing-medium;
+  border-bottom: 2px solid $border-color;
+  
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+  }
+
+  .header__side {
+    width: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .header-links {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &__nav-menu-item {
+    font-size: 18px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: $background;
+    transition: background-color $transition;
+    text-decoration: none;
+    color: #ffffffd3;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.747);
+      text-decoration: none;
+      color: #a928ff;
+    }
+    &.active {
+      border: 2px solid transparent;
+      border-image: linear-gradient(to right, #a928ff, $secondary-color) 1;
+      color: white;
+    }
+  }
+  .header-logout-btn{
+    border: 2px solid $border-color;
+    box-shadow: $box-shadow-light;
+  }
+}
