@@ -162,12 +162,9 @@ const authSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action: PayloadAction<User>) => {
         state.user = action.payload;
       })
-      .addCase(
-        refreshAccessToken.fulfilled,
-        (state, action: PayloadAction<{ accessToken: string }>) => {
-          state.isLogined = true;
-        }
-      )
+      .addCase(refreshAccessToken.fulfilled, (state) => {
+        state.isLogined = true;
+      })
       .addCase(refreshAccessToken.rejected, (state) => {
         state.isLogined = false;
         state.user = null;
