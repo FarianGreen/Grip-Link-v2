@@ -10,7 +10,7 @@ import { Path } from "../../constants/Path";
 import { loginSchema, LoginSchemaType } from "../../shared/loginSchema";
 import FormInput from "../../components/formInput/FormInput";
 
-const Login: React.FC = () => {
+const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, isLogined } = useSelector(
     (state: RootState) => state.auth

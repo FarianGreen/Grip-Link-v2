@@ -10,7 +10,7 @@ const MessageInput: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const chats = useSelector((state: RootState) => state.chat.chats);
-  const {users} = chats[0]
+  const { users } = chats[0];
 
   const receiver = users.find((u) => u.id !== user?.id);
 
@@ -43,7 +43,9 @@ const MessageInput: React.FC = () => {
     setMessage("");
   };
   const handleClick = () => {
-    dispatch(showNotification({ message: "✅ Всё работает!", type: "success" }));
+    dispatch(
+      showNotification({ message: "✅ Всё работает!", type: "success" })
+    );
   };
 
   return (

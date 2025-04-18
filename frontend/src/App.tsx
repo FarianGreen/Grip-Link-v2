@@ -1,15 +1,24 @@
-import { lazy, Suspense, useEffect } from "react";
+import { JSX, lazy, Suspense, useEffect } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Layout } from "./layout";
 import { Path } from "./constants/Path";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "./store/store";
 import { fetchUser } from "./store/authSlice";
+import ErrorBoundry from "./shared/errorBoundary/ErrorBoundary";
 
 const MessagesPage = lazy(() => import("./pages/messages/Messages"));
 const RegisterForm = lazy(() => import("./pages/register/Register"));
 const LoginForm = lazy(() => import("./pages/login/Login"));
 const HomePage = lazy(() => import("./pages/home/Home"));
+
+const withBoundedSuspense = (Component: React.LazyExoticComponent<() => JSX.Element>) => (
+  <ErrorBoundry>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Component />
+    </Suspense>
+  </ErrorBoundry>
+);
 
 const router = createBrowserRouter([
   {
@@ -18,37 +27,21 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <HomePage />
-          </Suspense>
-        ),
+        element: withBoundedSuspense(HomePage)
       },
       {
         path: Path.messages,
-        element: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <MessagesPage />
-          </Suspense>
-        ),
+        element: withBoundedSuspense(MessagesPage),
       },
     ],
   },
   {
     path: Path.register,
-    element: (
-      <Suspense fallback={<div>Loading...</div>}>
-        <RegisterForm />
-      </Suspense>
-    ),
+    element: withBoundedSuspense(RegisterForm),
   },
   {
     path: Path.login,
-    element: (
-      <Suspense fallback={<div>Loading...</div>}>
-        <LoginForm />
-      </Suspense>
-    ),
+    element:withBoundedSuspense(LoginForm),
   },
 ]);
 
