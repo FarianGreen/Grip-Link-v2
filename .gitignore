@@ -1,3 +1,55 @@
+# ─────🌐 GLOBAL (общее)─────
 node_modules/
 dist/
-.env
+build/
+.env*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# ─────🧠 FRONTEND─────
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env*
+frontend/.cache/
+frontend/.vite/
+frontend/.turbo/
+frontend/.next/
+frontend/coverage/
+
+# ─────🟢 BACKEND─────
+backend/node_modules/
+backend/dist/
+backend/uploads/
+backend/.env*
+backend/ormconfig.json
+backend/ormconfig.js
+backend/typeorm*.json
+backend/*.sqlite
+backend/coverage/
+
+# ─────🧠 IDE / SYSTEM─────
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ─────🧪 TESTING─────
+coverage/
+*.lcov
+test-output/
+
+# ─────🐳 DOCKER (если позже будешь использовать)─────
+docker-compose.override.yml
+.docker/
+
+# ─────🔐 SECURITY (только на всякий случай)─────
+*.pem
+*.key
+*.crt
+*.cert
