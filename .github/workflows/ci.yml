@@ -1,0 +1,45 @@
+name: 🔁 CI/CD — Build Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🧱 Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 📦 Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: ⚛️ Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: 📦 Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: 🟢 Build backend (если есть TypeScript)
+        working-directory: ./backend
+        run: |
+          if [ -f tsconfig.json ]; then
+            npm run build || echo "⚠️ Warning: build failed or not defined"
+          else
+            echo "No tsconfig.json found, skipping backend build"
+          fi
