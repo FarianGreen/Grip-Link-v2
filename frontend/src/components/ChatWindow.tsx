@@ -4,9 +4,10 @@ import { RootState, AppDispatch } from "../store/store";
 import { fetchMessages } from "../store/chatSlice";
 import MessageInput from "./MessageInput";
 import { initSocket } from "../services/socket";
+import { motion } from "framer-motion";
 
 interface ChatWindowProps {
-  chatId: number;
+  chatId: number | null;
 }
 
 const ChatWindow = ({ chatId }: ChatWindowProps) => {
@@ -44,14 +45,18 @@ const ChatWindow = ({ chatId }: ChatWindowProps) => {
                 const isSentByMe = msg.sender.id === currentUserId;
 
                 return (
-                  <div
+                  <motion.div
                     key={msg.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
                     className={`message ${isSentByMe ? "sent" : "received"} ${
                       !msg.isRead ? "unread" : ""
                     }`}
                   >
                     <strong>{msg.sender.name}:</strong> {msg.content}
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
