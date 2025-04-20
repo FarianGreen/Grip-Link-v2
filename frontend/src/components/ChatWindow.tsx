@@ -1,16 +1,20 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../store/store";
 import { fetchMessages } from "../store/chatSlice";
 import MessageInput from "./MessageInput";
 import { initSocket } from "../services/socket";
 
-const ChatWindow: React.FC = () => {
+interface ChatWindowProps {
+  chatId: number;
+}
+
+const ChatWindow = ({ chatId }: ChatWindowProps) => {
+  const selectedChatId = chatId;
+
   const dispatch = useDispatch<AppDispatch>();
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
-  const { messages, selectedChatId } = useSelector(
-    (state: RootState) => state.chat
-  );
+  const { messages } = useSelector((state: RootState) => state.chat);
 
   useEffect(() => {
     const socket = initSocket();
