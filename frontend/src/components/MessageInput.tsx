@@ -1,5 +1,6 @@
 import React from "react";
 import { useMessageInput } from "../hooks/useMessageInput";
+import { SendIcon } from "./Icons/SendIcon";
 
 
 const MessageInput: React.FC = () => {
@@ -22,7 +23,8 @@ const MessageInput: React.FC = () => {
         placeholder="Введите сообщение..."
       />
       <button disabled={!canSend} onClick={sendMessage}>
-        Отправить
+
+        <SendIcon size={22} color="#fff" />
       </button>
     </div>
   );
