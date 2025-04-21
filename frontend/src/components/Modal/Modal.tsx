@@ -1,14 +1,12 @@
-import "./modal.scss"
-
-import { ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import "./Modal.scss";
+import { motion } from "framer-motion";
+import "./modal.scss";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const Modal = ({ isOpen, onClose, children }: ModalProps) => {
@@ -20,31 +18,24 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
+  if (!isOpen) return null;
+
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="modal__backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="modal__content"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button className="modal__close" onClick={onClose}>
-              &#10006;
-            </button>
-            {children}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
+    <div className="modal-overlay" onClick={onClose}>
+      <motion.div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        transition={{ duration: 0.3 }}
+      >
+        <button className="modal-close" onClick={onClose}>
+          &times;
+        </button>
+        {children}
+      </motion.div>
+    </div>,
     document.body
   );
 };

@@ -8,6 +8,8 @@ import {
 } from "../store/chatSlice";
 import { fetchAllUsers } from "../store/authSlice";
 import { RootState, AppDispatch } from "../store/store";
+import { useModal } from "../hooks/useModal";
+import Modal from "./Modal/Modal";
 
 const ChatList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,6 +19,8 @@ const ChatList: React.FC = () => {
   );
   const users = useSelector((state: RootState) => state.auth.users);
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
+
+  const modal = useModal();
 
   useEffect(() => {
     dispatch(fetchChats());
@@ -74,6 +78,19 @@ const ChatList: React.FC = () => {
             </button>
           ))}
       </div>
+      <button onClick={modal.open} className="open-modal-btn">
+        ➕ Добавить пользователя
+      </button>
+
+      <Modal isOpen={modal.isOpen} onClose={modal.close}>
+        <form className="modal-form">
+          <h2 className="modal-form__title">Добавление пользователя</h2>
+          <p className="modal-form__subtitle">
+            Здесь может быть форма выбора пользователей в чат
+          </p>
+          <button onClick={modal.close}>Закрыть</button>
+        </form>
+      </Modal>
     </div>
   );
 };
