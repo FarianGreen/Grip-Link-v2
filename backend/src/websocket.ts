@@ -18,7 +18,7 @@ interface MarkAsReadPayload {
   userId: number;
 }
 
-let io: Server | null = null;
+export let io: Server | null = null;
 
 export const setupWebSocket = (server: HttpServer): void => {
   io = new Server(server, {

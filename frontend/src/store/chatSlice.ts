@@ -13,7 +13,7 @@ interface Message {
   content: string;
   senderId: number;
   createdAt: string;
-  isRead?:boolean;
+  isRead?: boolean;
 }
 
 interface Chat {
@@ -68,7 +68,7 @@ export const createChat = createAsyncThunk(
   "chats/create",
   async (userIds: number[], { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/chats", {userIds});
+      const response = await axiosInstance.post("/chats", { userIds });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -92,6 +92,10 @@ export const deleteChat = createAsyncThunk(
   }
 );
 
+export const updateChatUsers = (chatId: number, userIds: number[]) => {
+  return axiosInstance.patch(`/chats/${chatId}/users`, { userIds });
+}
+
 const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -101,6 +105,22 @@ const chatSlice = createSlice({
     },
     addMessage: (state, action: PayloadAction<Message>) => {
       state.messages.push(action.payload);
+    },
+    updateChat: (state, action: PayloadAction<Chat>) => {
+      const updated = action.payload;
+      const index = state.chats.findIndex(
+        (chat) => chat.chatId === updated.chatId
+      );
+
+      if (index !== -1) {
+        state.chats[index] = {
+          ...state.chats[index],
+          ...updated,
+          users: updated.users,
+        };
+      } else {
+        state.chats.push(updated);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -124,5 +144,5 @@ const chatSlice = createSlice({
   },
 });
 
-export const { setSelectedChat, addMessage } = chatSlice.actions;
+export const { setSelectedChat, addMessage, updateChat } = chatSlice.actions;
 export default chatSlice.reducer;

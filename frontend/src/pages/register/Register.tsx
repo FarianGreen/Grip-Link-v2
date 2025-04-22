@@ -1,13 +1,14 @@
 import "./register.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser } from "../../store/authSlice";
+import { loginUser, registerUser } from "../../store/authSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { Path } from "../../constants/Path";
 import { RegisterFormData, registerSchema } from "../../shared/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import FormInput from "../../components/formInput/FormInput";
+import { fetchChats } from "../../store/chatSlice";
 
 const Register = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -24,8 +25,15 @@ const Register = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     const result = await dispatch(registerUser(data));
+
     if (registerUser.fulfilled.match(result)) {
-      navigate(Path.home);
+      const { email, password } = result.meta.arg;
+      const loginResult = await dispatch(loginUser({ email, password }));
+
+      if (loginUser.fulfilled.match(loginResult)) {
+        await dispatch(fetchChats());
+        navigate(Path.home);
+      }
     }
   };
 

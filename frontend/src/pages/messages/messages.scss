@@ -40,6 +40,18 @@
       color: white;
     }
   }
+  &__create {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .open-modal-btn {
+    width: 100%;
+    margin-top: 0.6rem;
+  }
+  .disable {
+    display: none;
+  }
 }
 
 .chat-container {

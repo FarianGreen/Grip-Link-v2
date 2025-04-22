@@ -1,4 +1,6 @@
 import { io, Socket } from "socket.io-client";
+import { updateChat } from "../store/chatSlice";
+import store from "../store/store";
 
 const SOCKET_URL = "http://localhost:5000";
 
@@ -28,14 +30,11 @@ export const initSocket = (): Socket => {
     socket.io.on("reconnect_error", (err) => {
       console.error("❌ Ошибка при переподключении:", err.message);
     });
+
+    socket.on("chat:updated", (chat) => {
+      store.dispatch(updateChat(chat));
+    });
   }
 
   return socket;
 };
-
-// export const getSocket = (): Socket => {
-//   if (!socket) {
-//     throw new Error("⛔ WebSocket ещё не инициализирован. Вызови initSocket() сначала.");
-//   }
-//   return socket;
-// };
