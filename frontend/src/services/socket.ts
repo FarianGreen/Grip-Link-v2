@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { updateChat } from "../store/chatSlice";
+import { updateChat, updateMessage } from "../store/chatSlice";
 import store from "../store/store";
 
 const SOCKET_URL = "http://localhost:5000";
@@ -33,6 +33,10 @@ export const initSocket = (): Socket => {
 
     socket.on("chat:updated", (chat) => {
       store.dispatch(updateChat(chat));
+    });
+
+    socket.on("message:updated", (msg) => {
+      store.dispatch(updateMessage(msg));
     });
   }
 

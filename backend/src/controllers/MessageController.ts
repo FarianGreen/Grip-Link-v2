@@ -3,7 +3,7 @@ import AppDataSource from "../data-source";
 import { Message } from "../entities/Message";
 import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
-import { sendMessageToChatWithSocket } from "../websocket";
+import { io, sendMessageToChatWithSocket } from "../websocket";
 
 interface AuthRequest extends Request {
   user?: {
@@ -47,8 +47,14 @@ export const getChatMessages = async (
       .leftJoin("message.sender", "sender")
       .leftJoin("message.receiver", "receiver")
       .addSelect([
-        "sender.id", "sender.name", "sender.email", "sender.avatar",
-        "receiver.id", "receiver.name", "receiver.email", "receiver.avatar"
+        "sender.id",
+        "sender.name",
+        "sender.email",
+        "sender.avatar",
+        "receiver.id",
+        "receiver.name",
+        "receiver.email",
+        "receiver.avatar",
       ])
       .where("message.chatId = :chatId", { chatId })
       .orderBy("message.createdAt", "ASC")
@@ -117,4 +123,43 @@ export const sendMessageToChat = async (
     console.error("Ошибка при отправке сообщения:", error);
     res.status(500).json({ message: "Ошибка сервера" });
   }
+};
+
+export const updateMessage = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  const { content } = req.body;
+
+  if (io == null) return;
+  if (!content?.trim()) {
+    res.status(400).json({ message: "Контент не может быть пустым" });
+    return;
+  }
+
+  const messageRepo = AppDataSource.getRepository(Message);
+  const message = await messageRepo.findOne({
+    where: { id: +id },
+    relations: ["sender", "chat"],
+  });
+
+  if (!message) {
+    res.status(404).json({ message: "Сообщение не найдено" });
+    return;
+  }
+
+  // Только отправитель может редактировать
+  if (message.sender.id !== req.user?.id) {
+    res.status(403).json({ message: "Нет прав на редактирование" });
+    return;
+  }
+
+  message.content = content;
+  message.isEdited = true;
+
+  await messageRepo.save(message);
+  io.to(String(message.chat.chatId)).emit("message:updated", message);
+
+  res.json(message);
 };

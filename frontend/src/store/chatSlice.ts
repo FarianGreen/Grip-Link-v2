@@ -14,6 +14,7 @@ interface Message {
   senderId: number;
   createdAt: string;
   isRead?: boolean;
+  isEdited?: boolean;
 }
 
 interface Chat {
@@ -122,6 +123,10 @@ const chatSlice = createSlice({
         state.chats.push(updated);
       }
     },
+    updateMessage: (state, action: PayloadAction<Message>) => {
+      const index = state.messages.findIndex((m) => m.id === action.payload.id);
+      if (index !== -1) state.messages[index] = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -144,5 +149,6 @@ const chatSlice = createSlice({
   },
 });
 
-export const { setSelectedChat, addMessage, updateChat } = chatSlice.actions;
+export const { setSelectedChat, addMessage, updateChat, updateMessage } =
+  chatSlice.actions;
 export default chatSlice.reducer;

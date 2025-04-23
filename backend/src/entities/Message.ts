@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  JoinColumn,
+} from "typeorm";
 import { User } from "./User";
 import { Chat } from "./Chat";
 
@@ -10,7 +17,9 @@ export class Message {
   @ManyToOne(() => User, (user) => user.sentMessages, { onDelete: "CASCADE" })
   sender!: User;
 
-  @ManyToOne(() => User, (user) => user.receivedMessages, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.receivedMessages, {
+    onDelete: "CASCADE",
+  })
   receiver!: User;
 
   @ManyToOne(() => Chat, (chat) => chat.messages, { onDelete: "CASCADE" })
@@ -22,6 +31,9 @@ export class Message {
 
   @Column({ default: false })
   isRead!: boolean;
+
+  @Column({ default: false })
+  isEdited!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;

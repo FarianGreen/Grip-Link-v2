@@ -111,6 +111,7 @@
     word-break: break-word;
     transition: background-color $transition;
     align-self: flex-start;
+    cursor: pointer;
 
     &.sent {
       background: $primary-color;

@@ -99,6 +99,7 @@ export const setupWebSocket = (server: HttpServer): void => {
         console.error("❌ Ошибка при обновлении isRead:", err);
       }
     });
+    
 
     socket.on("disconnect", () => {
       console.log(`🔌 Socket отключён: ${socket.id}`);
