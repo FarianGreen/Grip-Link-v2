@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store/store";
 import "./modal.scss";
-import { updateChatUsers } from "../../store/chatSlice";
+import { updateChat, updateChatUsers } from "../../store/chatSlice";
 
 interface Props {
   chatId: number;
@@ -10,6 +10,7 @@ interface Props {
 }
 
 const AddUsersModal: React.FC<Props> = ({ chatId, onClose }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const allUsers = useSelector((state: RootState) => state.auth.users);
   const chat = useSelector((state: RootState) =>
     state.chat.chats.find((c) => c.chatId === chatId)
@@ -33,7 +34,8 @@ const AddUsersModal: React.FC<Props> = ({ chatId, onClose }) => {
     }
 
     try {
-      await updateChatUsers(chatId, selectedIds);
+      const response = await updateChatUsers(chatId, selectedIds);
+      dispatch(updateChat(response.data));
       onClose();
     } catch (error) {
       console.error("Ошибка при обновлении участников:", error);

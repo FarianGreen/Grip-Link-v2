@@ -26,7 +26,7 @@ const ChatList: React.FC = () => {
   useEffect(() => {
     dispatch(fetchChats());
     dispatch(fetchAllUsers());
-  }, [chats]);
+  }, [dispatch]);
 
   const handleCreateChat = (userId: number) => {
     if (!currentUserId) return;

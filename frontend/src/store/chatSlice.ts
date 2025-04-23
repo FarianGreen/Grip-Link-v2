@@ -94,7 +94,7 @@ export const deleteChat = createAsyncThunk(
 
 export const updateChatUsers = (chatId: number, userIds: number[]) => {
   return axiosInstance.patch(`/chats/${chatId}/users`, { userIds });
-}
+};
 
 const chatSlice = createSlice({
   name: "chat",
