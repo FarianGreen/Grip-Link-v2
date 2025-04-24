@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store/store";
-import axiosInstance from "../../services/api/axiosInstance";
-// import "./EditMessageModal.scss";
-import { updateMessage } from "../../store/chatSlice";
+import { editMessageInChat, updateMessage } from "../../store/chatSlice";
 
 interface EditMessageModalProps {
   messageId: number;
@@ -27,10 +25,8 @@ const EditMessageModal: React.FC<EditMessageModalProps> = ({
       return;
     }
     try {
-      const response = await axiosInstance.patch(`/chats/messages/${messageId}`, {
-        content,
-      });
-      dispatch(updateMessage(response.data));
+      await editMessageInChat(messageId, content);
+      // dispatch(updateMessage(response.data));
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.message || "Ошибка при обновлении");
@@ -38,25 +34,26 @@ const EditMessageModal: React.FC<EditMessageModalProps> = ({
   };
 
   return (
-    <div className="edit-modal">
-      <h2>Редактировать сообщение</h2>
-      <form onSubmit={handleSubmit}>
+    <form className="modal-content__form" onSubmit={handleSubmit}>
+      <h2 className="modal-content__title">Редактировать сообщение</h2>
+      <div className="form-group">
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={5}
+          className="form-textarea"
         />
-        {error && <p className="edit-error">{error}</p>}
-        <div className="edit-actions">
-          <button type="submit" className="save-btn">
-            Сохранить
-          </button>
-          <button type="button" className="cancel-btn" onClick={onClose}>
-            Отмена
-          </button>
-        </div>
-      </form>
-    </div>
+        {error && <p className="form-error">{error}</p>}
+      </div>
+      <div className="form-actions">
+        <button type="submit" className="save-btn">
+          Сохранить
+        </button>
+        <button type="button" className="cancel-btn" onClick={onClose}>
+          Отмена
+        </button>
+      </div>
+    </form>
   );
 };
 

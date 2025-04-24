@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from "./store/store";
 import { fetchUser } from "./store/authSlice";
 import Loader from "./components/Loader/Loader";
 import AnimatedRoutes from "./utils/AnimatedRoutes";
+import { initSocket } from "./services/socket";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -16,9 +17,15 @@ function App() {
       dispatch(fetchUser());
     }
   }, [user, loading]);
+
+  useEffect(() => {
+    initSocket();
+  }, [dispatch]);
+
   if (isLogined && !user && loading) {
     return <Loader />;
   }
+
   return <AnimatedRoutes />;
 }
 

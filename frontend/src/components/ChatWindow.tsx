@@ -5,6 +5,7 @@ import { fetchMessages } from "../store/chatSlice";
 import MessageInput from "./MessageInput";
 import { initSocket } from "../services/socket";
 import MessageItem from "./messageItem/MessageItem";
+import { useJoinChatRoom } from "../hooks/useJoinChatRoom";
 
 interface ChatWindowProps {
   chatId: number | null;
@@ -16,7 +17,7 @@ const ChatWindow = ({ chatId }: ChatWindowProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
   const { messages } = useSelector((state: RootState) => state.chat);
-
+  useJoinChatRoom(chatId);
   useEffect(() => {
     const socket = initSocket();
 

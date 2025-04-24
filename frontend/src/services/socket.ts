@@ -1,6 +1,11 @@
 import { io, Socket } from "socket.io-client";
-import { updateChat, updateMessage } from "../store/chatSlice";
 import store from "../store/store";
+import {
+  addMessage,
+  deleteMessage,
+  updateMessage,
+  updateChat,
+} from "../store/chatSlice";
 
 const SOCKET_URL = "http://localhost:5000";
 
@@ -16,11 +21,11 @@ export const initSocket = (): Socket => {
     });
 
     socket.on("connect", () => {
-      console.log("✅ WebSocket подключен:", socket?.id);
+      console.log("✅ Socket подключен:", socket.id);
     });
 
     socket.on("disconnect", (reason) => {
-      console.warn("⚠️ WebSocket отключен:", reason);
+      console.warn("⚠️ Socket отключён:", reason);
     });
 
     socket.io.on("reconnect_attempt", (attempt) => {
@@ -28,15 +33,26 @@ export const initSocket = (): Socket => {
     });
 
     socket.io.on("reconnect_error", (err) => {
-      console.error("❌ Ошибка при переподключении:", err.message);
+      console.error("❌ Ошибка переподключения:", err.message);
     });
 
-    socket.on("chat:updated", (chat) => {
-      store.dispatch(updateChat(chat));
+    // 💬 Сообщения
+    socket.on("receiveMessage", (msg) => {
+      console.log("📩 Получено сообщение:", msg);
+      store.dispatch(addMessage(msg));
     });
 
     socket.on("message:updated", (msg) => {
       store.dispatch(updateMessage(msg));
+    });
+
+    socket.on("message:deleted", ({ id }) => {
+      store.dispatch(deleteMessage(id));
+    });
+
+    // 🔄 Чаты
+    socket.on("chat:updated", (chat) => {
+      store.dispatch(updateChat(chat));
     });
   }
 

@@ -163,3 +163,32 @@ export const updateMessage = async (
 
   res.json(message);
 };
+export const deleteMessage = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  if (io == null) return;
+  const messageRepo = AppDataSource.getRepository(Message);
+  const message = await messageRepo.findOne({
+    where: { id: +id },
+    relations: ["sender", "chat"],
+  });
+
+  if (!message) {
+    res.status(404).json({ message: "Сообщение не найдено" });
+    return;
+  }
+
+  if (message.sender.id !== req.user?.id) {
+    res.status(403).json({ message: "Нет прав на удаление" });
+    return;
+  }
+
+  await messageRepo.remove(message);
+  io.to(String(message.chat.chatId)).emit("message:deleted", {
+    id: message.id,
+  });
+
+  res.status(204).end();
+};

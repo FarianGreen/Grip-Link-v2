@@ -1,11 +1,12 @@
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
 import AppDataSource from "./data-source";
-import { Message } from "./entities/Message";
 import { Chat } from "./entities/Chat";
+import { Message } from "./entities/Message";
 import { User } from "./entities/User";
 
-// 🏷️ Интерфейс данных для отправки сообщений
+export let io: Server | null = null;
+
 interface SendMessagePayload {
   chatId: number;
   senderId: number;
@@ -18,8 +19,6 @@ interface MarkAsReadPayload {
   userId: number;
 }
 
-export let io: Server | null = null;
-
 export const setupWebSocket = (server: HttpServer): void => {
   io = new Server(server, {
     cors: {
@@ -31,57 +30,28 @@ export const setupWebSocket = (server: HttpServer): void => {
   io.on("connection", (socket) => {
     console.log(`🟢 Socket подключен: ${socket.id}`);
 
+    // Join chat room
     socket.on("joinChat", (chatId: number) => {
-      socket.join(`chat_${chatId}`);
-      console.log(
-        `👥 Пользователь ${socket.id} присоединился к чату ${chatId}`
-      );
+      socket.join(getChatRoom(chatId));
+      console.log(`👥 ${socket.id} присоединился к чату #${chatId}`);
     });
 
+    // Incoming message
     socket.on("sendMessage", async (data: SendMessagePayload) => {
-      const { chatId, senderId, receiverId, content } = data;
       try {
-        const chatRepo = AppDataSource.getRepository(Chat);
-        const userRepo = AppDataSource.getRepository(User);
-        const messageRepo = AppDataSource.getRepository(Message);
+        const message = await handleCreateMessage(data);
+        if (!message) return;
 
-        const [chat, sender] = await Promise.all([
-          chatRepo.findOne({ where: { chatId }, relations: ["users"] }),
-          userRepo.findOne({ where: { id: senderId } }),
-        ]);
-
-        if (!chat || !sender) {
-          console.warn("❌ Неверный чат или отправитель");
-          return;
-        }
-
-        let receiver: User | null = null;
-
-        if (receiverId) {
-          receiver = await userRepo.findOne({ where: { id: receiverId } });
-        } else {
-          console.warn("❌ Получатель не найден");
-        }
-
-        const message = messageRepo.create({
-          content,
-          chat,
-          sender,
-          ...(receiver ? { receiver } : {}),
-        });
-
-        await messageRepo.save(message);
-
-        io?.to(`chat_${chatId}`).emit("receiveMessage", message);
-      } catch (error) {
-        console.error("❌ Ошибка при отправке сообщения:", error);
+        emitToChat(data.chatId, "receiveMessage", message);
+      } catch (err) {
+        console.error("❌ Ошибка sendMessage:", err);
       }
     });
 
+    // Mark as read
     socket.on("markAsRead", async ({ chatId, userId }: MarkAsReadPayload) => {
       try {
-        const repo = AppDataSource.getRepository(Message);
-        const result = await repo.update(
+        const result = await AppDataSource.getRepository(Message).update(
           {
             chat: { chatId },
             receiver: { id: userId },
@@ -91,30 +61,66 @@ export const setupWebSocket = (server: HttpServer): void => {
         );
 
         if (result.affected && result.affected > 0) {
-          console.log(
-            `📩 ${result.affected} сообщений помечено прочитанными в чате ${chatId} для пользователя ${userId}`
-          );
+          console.log(`✅ ${result.affected} прочитано в чате ${chatId}`);
         }
       } catch (err) {
-        console.error("❌ Ошибка при обновлении isRead:", err);
+        console.error("❌ Ошибка markAsRead:", err);
       }
     });
-    
 
     socket.on("disconnect", () => {
-      console.log(`🔌 Socket отключён: ${socket.id}`);
+      console.log(`🔌 Socket отключен: ${socket.id}`);
     });
   });
 };
 
+// 🌐 Вспомогательные
+
+const getChatRoom = (chatId: number) => `chat_${chatId}`;
+
+const emitToChat = (chatId: number, event: string, payload: any) => {
+  if (!io) return;
+  io.to(getChatRoom(chatId)).emit(event, payload);
+};
+
+const handleCreateMessage = async ({
+  chatId,
+  senderId,
+  receiverId,
+  content,
+}: SendMessagePayload): Promise<Message | null> => {
+  const chatRepo = AppDataSource.getRepository(Chat);
+  const userRepo = AppDataSource.getRepository(User);
+  const msgRepo = AppDataSource.getRepository(Message);
+
+  const [chat, sender] = await Promise.all([
+    chatRepo.findOne({ where: { chatId }, relations: ["users"] }),
+    userRepo.findOne({ where: { id: senderId } }),
+  ]);
+
+  if (!chat || !sender) {
+    console.warn("❌ Чат или отправитель не найден");
+    return null;
+  }
+
+  const receiver = receiverId
+    ? await userRepo.findOne({ where: { id: receiverId } })
+    : null;
+
+  const message = msgRepo.create({
+    content,
+    chat,
+    sender,
+    ...(receiver ? { receiver } : {}),
+  });
+
+  return msgRepo.save(message);
+};
+
+// 🧠 Экспорт отправки снаружи
 export const sendMessageToChatWithSocket = (
   chatId: number,
   message: Message
 ): void => {
-  if (!io) {
-    console.error("❌ WebSocket не инициализирован");
-    return;
-  }
-
-  io.to(`chat_${chatId}`).emit("newMessage", message);
+  emitToChat(chatId, "newMessage", message);
 };

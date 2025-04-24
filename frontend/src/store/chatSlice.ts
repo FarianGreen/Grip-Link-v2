@@ -97,6 +97,16 @@ export const updateChatUsers = (chatId: number, userIds: number[]) => {
   return axiosInstance.patch(`/chats/${chatId}/users`, { userIds });
 };
 
+export const editMessageInChat = (messageId: number, content: string) => {
+  return axiosInstance.patch(`/chats/messages/${messageId}`, {
+    content,
+  });
+};
+
+export const deleteMessageInChat = (messageId: number) => {
+  return axiosInstance.delete(`/chats/messages/${messageId}`);
+};
+
 const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -127,6 +137,9 @@ const chatSlice = createSlice({
       const index = state.messages.findIndex((m) => m.id === action.payload.id);
       if (index !== -1) state.messages[index] = action.payload;
     },
+    deleteMessage: (state, action: PayloadAction<number>) => {
+      state.messages = state.messages.filter((m) => m.id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -149,6 +162,11 @@ const chatSlice = createSlice({
   },
 });
 
-export const { setSelectedChat, addMessage, updateChat, updateMessage } =
-  chatSlice.actions;
+export const {
+  setSelectedChat,
+  addMessage,
+  updateChat,
+  updateMessage,
+  deleteMessage,
+} = chatSlice.actions;
 export default chatSlice.reducer;

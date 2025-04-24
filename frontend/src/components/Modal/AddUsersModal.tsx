@@ -22,7 +22,9 @@ const AddUsersModal: React.FC<Props> = ({ chatId, onClose }) => {
 
   const toggleUser = (userId: number) => {
     setSelectedIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
     );
   };
 
@@ -34,8 +36,8 @@ const AddUsersModal: React.FC<Props> = ({ chatId, onClose }) => {
     }
 
     try {
-      const response = await updateChatUsers(chatId, selectedIds);
-      dispatch(updateChat(response.data));
+      await updateChatUsers(chatId, selectedIds);
+      // dispatch(updateChat(response.data));
       onClose();
     } catch (error) {
       console.error("Ошибка при обновлении участников:", error);
@@ -43,29 +45,29 @@ const AddUsersModal: React.FC<Props> = ({ chatId, onClose }) => {
   };
 
   return (
-    <div className="add-users-modal">
-      <form className="add-users-modal__form" onSubmit={handleSubmit}>
-        <h2 className="add-users-modal__form-header">Участники чата #{chatId}</h2>
-        <div className="user-list">
-          {allUsers.map((user) => (
-            <label key={user.id}>
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(user.id)}
-                onChange={() => toggleUser(user.id)}
-              />
-              {user.name}
-            </label>
-          ))}
-        </div>
-        <div className="actions">
-          <button type="submit">💾 Сохранить</button>
-          <button type="button" onClick={onClose}>
-            ❌ Закрыть
-          </button>
-        </div>
-      </form>
-    </div>
+    <form className="modal-content__form" onSubmit={handleSubmit}>
+      <h2 className="modal-content__title">Участники чата #{chatId}</h2>
+      <div className="form-group user-list">
+        {allUsers.map((user) => (
+          <label className="form-group__label" key={user.id}>
+            <input
+              type="checkbox"
+              checked={selectedIds.includes(user.id)}
+              onChange={() => toggleUser(user.id)}
+            />
+            {user.name}
+          </label>
+        ))}
+      </div>
+      <div className="form-actions">
+        <button type="submit" className="save-btn">
+          💾 Сохранить
+        </button>
+        <button type="button" className="cancel-btn" onClick={onClose}>
+          ❌ Закрыть
+        </button>
+      </div>
+    </form>
   );
 };
 

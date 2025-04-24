@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Modal from "../Modal/Modal";
 import EditMessageModal from "../Modal/EditMessageModal";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store/store";
+import { deleteMessage } from "../../store/chatSlice";
 
 interface User {
   id: number;
@@ -23,6 +26,7 @@ interface Props {
 }
 
 const MessageItem = ({ message, currentUserId }: Props) => {
+  const dispatch = useDispatch<AppDispatch>();
   const isSentByMe = message.sender.id === currentUserId;
   const [isEditing, setIsEditing] = useState(false);
 
@@ -50,7 +54,7 @@ const MessageItem = ({ message, currentUserId }: Props) => {
           {isSentByMe && (
             <div className="message-actions">
               <button onClick={handleOpenEdit}>✏️</button>
-              {/* Добавим удаление позже */}
+              <button onClick={() => dispatch(deleteMessage(message.id))}>🗑</button>
             </div>
           )}
         </div>
