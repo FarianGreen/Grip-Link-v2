@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../store/store";
-import { editMessageInChat, updateMessage } from "../../store/chatSlice";
+import { editMessageInChat } from "../../store/chatSlice";
 
 interface EditMessageModalProps {
   messageId: number;
@@ -16,7 +14,6 @@ const EditMessageModal: React.FC<EditMessageModalProps> = ({
 }) => {
   const [content, setContent] = useState(initialContent);
   const [error, setError] = useState("");
-  const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +23,6 @@ const EditMessageModal: React.FC<EditMessageModalProps> = ({
     }
     try {
       await editMessageInChat(messageId, content);
-      // dispatch(updateMessage(response.data));
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.message || "Ошибка при обновлении");

@@ -6,10 +6,7 @@ import { User } from "../entities/User";
 import { io, sendMessageToChatWithSocket } from "../websocket";
 
 interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    role: "user" | "admin";
-  };
+  user?: { id: number; role: "user" | "admin" };
 }
 
 export const getChatMessages = async (
@@ -25,8 +22,7 @@ export const getChatMessages = async (
       return;
     }
 
-    const chatRepository = AppDataSource.getRepository(Chat);
-    const chat = await chatRepository.findOne({
+    const chat = await AppDataSource.getRepository(Chat).findOne({
       where: { chatId },
       relations: ["users"],
     });
@@ -60,135 +56,114 @@ export const getChatMessages = async (
       .orderBy("message.createdAt", "ASC")
       .getMany();
 
-    res.json(messages);
-  } catch (error) {
-    console.error("Ошибка при получении сообщений чата:", error);
+    const cleanedMessages = messages.map((msg) => ({
+      id: msg.id,
+      content: msg.content,
+      createdAt: msg.createdAt,
+      isRead: msg.isRead,
+      isEdited: msg.isEdited,
+      sender: msg.sender
+        ? {
+            id: msg.sender.id,
+            name: msg.sender.name,
+            email: msg.sender.email,
+            avatar: msg.sender.avatar,
+          }
+        : null,
+      receiver: msg.receiver
+        ? {
+            id: msg.receiver.id,
+            name: msg.receiver.name,
+            email: msg.receiver.email,
+            avatar: msg.receiver.avatar,
+          }
+        : null,
+    }));
+
+    res.json(cleanedMessages);
+  } catch (err) {
+    console.error("Ошибка при получении сообщений чата:", err);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
 
-export const sendMessageToChat = async (
-  req: AuthRequest,
-  res: Response
-): Promise<void> => {
-  try {
-    const chatId = parseInt(req.params.chatId);
-    const senderId = req.user?.id;
-    const { content } = req.body;
-
-    if (!content) {
-      res.status(400).json({ message: "Сообщение не может быть пустым" });
-      return;
-    }
-
-    const chatRepository = AppDataSource.getRepository(Chat);
-    const chat = await chatRepository.findOne({
-      where: { chatId: chatId },
-      relations: ["users"],
-    });
-
-    if (!chat) {
-      res.status(404).json({ message: "Чат не найден" });
-      return;
-    }
-
-    // Проверяем, является ли отправитель участником чата
-    const isMember = chat.users.some((user) => user.id === senderId);
-    if (!isMember) {
-      res.status(403).json({ message: "Вы не состоите в этом чате" });
-      return;
-    }
-
-    // Создаём сообщение
-    const sender = await AppDataSource.getRepository(User).findOne({
-      where: { id: senderId },
-    });
-
-    if (!sender) {
-      res.status(404).json({ message: "Отправитель не найден" });
-      return;
-    }
-
-    const newMessage = new Message();
-    newMessage.content = content;
-    newMessage.sender = sender;
-    newMessage.chat = chat;
-
-    await AppDataSource.getRepository(Message).save(newMessage);
-
-    sendMessageToChatWithSocket(chatId, newMessage);
-
-    res.status(201).json(newMessage);
-  } catch (error) {
-    console.error("Ошибка при отправке сообщения:", error);
-    res.status(500).json({ message: "Ошибка сервера" });
-  }
-};
-
-export const updateMessage = async (
-  req: AuthRequest,
-  res: Response
-): Promise<void> => {
-  const { id } = req.params;
+export const sendMessageToChat = async (req: AuthRequest, res: Response) => {
+  const chatId = +req.params.chatId;
+  const senderId = req.user?.id;
   const { content } = req.body;
 
-  if (io == null) return;
-  if (!content?.trim()) {
-    res.status(400).json({ message: "Контент не может быть пустым" });
-    return;
+  if (!content || !senderId)
+    return res.status(400).json({ message: "Контент отсутствует или неавторизован" });
+
+  try {
+    const chatRepo = AppDataSource.getRepository(Chat);
+    const chat = await chatRepo.findOne({ where: { chatId }, relations: ["users"] });
+    if (!chat) return res.status(404).json({ message: "Чат не найден" });
+
+    const isParticipant = chat.users.some((u) => u.id === senderId);
+    if (!isParticipant) return res.status(403).json({ message: "Вы не участник чата" });
+
+    const sender = await AppDataSource.getRepository(User).findOne({ where: { id: senderId } });
+    if (!sender) return res.status(404).json({ message: "Пользователь не найден" });
+
+    const message = AppDataSource.getRepository(Message).create({
+      content,
+      chat,
+      sender,
+    });
+
+    const saved = await AppDataSource.getRepository(Message).save(message);
+    sendMessageToChatWithSocket(chatId, saved);
+
+    res.status(201).json(saved);
+  } catch (err) {
+    console.error("Ошибка при отправке сообщения:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
-
-  const messageRepo = AppDataSource.getRepository(Message);
-  const message = await messageRepo.findOne({
-    where: { id: +id },
-    relations: ["sender", "chat"],
-  });
-
-  if (!message) {
-    res.status(404).json({ message: "Сообщение не найдено" });
-    return;
-  }
-
-  // Только отправитель может редактировать
-  if (message.sender.id !== req.user?.id) {
-    res.status(403).json({ message: "Нет прав на редактирование" });
-    return;
-  }
-
-  message.content = content;
-  message.isEdited = true;
-
-  await messageRepo.save(message);
-  io.to(String(message.chat.chatId)).emit("message:updated", message);
-
-  res.json(message);
 };
-export const deleteMessage = async (
-  req: AuthRequest,
-  res: Response
-): Promise<void> => {
-  const { id } = req.params;
-  if (io == null) return;
-  const messageRepo = AppDataSource.getRepository(Message);
-  const message = await messageRepo.findOne({
-    where: { id: +id },
-    relations: ["sender", "chat"],
-  });
 
-  if (!message) {
-    res.status(404).json({ message: "Сообщение не найдено" });
-    return;
+export const updateMessage = async (req: AuthRequest, res: Response) => {
+  const id = +req.params.id;
+  const { content } = req.body;
+  if (!content?.trim()) return res.status(400).json({ message: "Пустой контент" });
+
+  try {
+    const repo = AppDataSource.getRepository(Message);
+    const message = await repo.findOne({ where: { id }, relations: ["sender", "chat"] });
+    if (!message) return res.status(404).json({ message: "Сообщение не найдено" });
+
+    if (message.sender.id !== req.user?.id)
+      return res.status(403).json({ message: "Нет прав на редактирование" });
+
+    message.content = content;
+    message.isEdited = true;
+
+    await repo.save(message);
+    io?.to(`chat_${message.chat.chatId}`).emit("message:updated", message);
+
+    res.json(message);
+  } catch (err) {
+    console.error("Ошибка редактирования:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
+};
 
-  if (message.sender.id !== req.user?.id) {
-    res.status(403).json({ message: "Нет прав на удаление" });
-    return;
+export const deleteMessage = async (req: AuthRequest, res: Response) => {
+  const id = +req.params.id;
+  try {
+    const repo = AppDataSource.getRepository(Message);
+    const message = await repo.findOne({ where: { id }, relations: ["sender", "chat"] });
+    if (!message) return res.status(404).json({ message: "Сообщение не найдено" });
+
+    if (message.sender.id !== req.user?.id)
+      return res.status(403).json({ message: "Нет прав на удаление" });
+
+    await repo.remove(message);
+    io?.to(`chat_${message.chat.chatId}`).emit("message:deleted", { id });
+
+    res.status(204).end();
+  } catch (err) {
+    console.error("Ошибка при удалении сообщения:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
-
-  await messageRepo.remove(message);
-  io.to(String(message.chat.chatId)).emit("message:deleted", {
-    id: message.id,
-  });
-
-  res.status(204).end();
 };

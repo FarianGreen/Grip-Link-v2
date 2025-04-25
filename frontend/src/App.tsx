@@ -16,7 +16,7 @@ function App() {
     if (!user) {
       dispatch(fetchUser());
     }
-  }, [user, loading]);
+  }, [user, loading, dispatch]);
 
   useEffect(() => {
     initSocket();
