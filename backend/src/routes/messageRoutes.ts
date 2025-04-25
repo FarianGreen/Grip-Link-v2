@@ -1,12 +1,11 @@
 import express, { Router } from "express";
+import { authMiddleware } from "../middleware/authMiddleware";
 import {
-  
   deleteMessage,
   getChatMessages,
   sendMessageToChat,
   updateMessage,
 } from "../controllers/MessageController";
-import { authMiddleware } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 router.get("/chats/:chatId/messages", authMiddleware, getChatMessages);

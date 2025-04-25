@@ -14,11 +14,11 @@ export const getChatMessages = async (
   res: Response
 ): Promise<void> => {
   try {
-    const chatId = parseInt(req.params.chatId);
+    const chatId = Number(req.params.chatId);
     const userId = req.user?.id;
 
-    if (isNaN(chatId)) {
-      res.status(400).json({ message: "Некорректный chatId" });
+    if (!userId || isNaN(chatId)) {
+      res.status(400).json({ message: "Некорректный запрос" });
       return;
     }
 
@@ -27,143 +27,157 @@ export const getChatMessages = async (
       relations: ["users"],
     });
 
-    if (!chat) {
-      res.status(404).json({ message: "Чат не найден" });
-      return;
-    }
-
-    const isMember = chat.users.some((user) => user.id === userId);
-    if (!isMember) {
-      res.status(403).json({ message: "Нет доступа к этому чату" });
+    if (!chat || !chat.users.some((u) => u.id === userId)) {
+      res.status(403).json({ message: "Доступ запрещён" });
       return;
     }
 
     const messages = await AppDataSource.getRepository(Message)
       .createQueryBuilder("message")
-      .leftJoin("message.sender", "sender")
-      .leftJoin("message.receiver", "receiver")
-      .addSelect([
-        "sender.id",
-        "sender.name",
-        "sender.email",
-        "sender.avatar",
-        "receiver.id",
-        "receiver.name",
-        "receiver.email",
-        "receiver.avatar",
-      ])
+      .leftJoinAndSelect("message.sender", "sender")
+      .leftJoinAndSelect("message.receiver", "receiver")
       .where("message.chatId = :chatId", { chatId })
       .orderBy("message.createdAt", "ASC")
       .getMany();
 
-    const cleanedMessages = messages.map((msg) => ({
+    const result = messages.map((msg) => ({
       id: msg.id,
       content: msg.content,
       createdAt: msg.createdAt,
       isRead: msg.isRead,
       isEdited: msg.isEdited,
-      sender: msg.sender
-        ? {
-            id: msg.sender.id,
-            name: msg.sender.name,
-            email: msg.sender.email,
-            avatar: msg.sender.avatar,
-          }
-        : null,
-      receiver: msg.receiver
-        ? {
-            id: msg.receiver.id,
-            name: msg.receiver.name,
-            email: msg.receiver.email,
-            avatar: msg.receiver.avatar,
-          }
-        : null,
+      sender: msg.sender && {
+        id: msg.sender.id,
+        name: msg.sender.name,
+        email: msg.sender.email,
+        avatar: msg.sender.avatar,
+      },
+      receiver: msg.receiver && {
+        id: msg.receiver.id,
+        name: msg.receiver.name,
+        email: msg.receiver.email,
+        avatar: msg.receiver.avatar,
+      },
     }));
 
-    res.json(cleanedMessages);
+    res.json(result);
   } catch (err) {
-    console.error("Ошибка при получении сообщений чата:", err);
+    console.error("Ошибка получения сообщений:", err);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
 
-export const sendMessageToChat = async (req: AuthRequest, res: Response) => {
-  const chatId = +req.params.chatId;
-  const senderId = req.user?.id;
-  const { content } = req.body;
-
-  if (!content || !senderId)
-    return res.status(400).json({ message: "Контент отсутствует или неавторизован" });
-
+export const sendMessageToChat = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
+    const chatId = Number(req.params.chatId);
+    const senderId = req.user?.id;
+    const { content } = req.body;
+
+    if (!senderId || !content?.trim()) {
+      res.status(400).json({ message: "Контент пустой или неавторизован" });
+      return;
+    }
+
     const chatRepo = AppDataSource.getRepository(Chat);
-    const chat = await chatRepo.findOne({ where: { chatId }, relations: ["users"] });
-    if (!chat) return res.status(404).json({ message: "Чат не найден" });
-
-    const isParticipant = chat.users.some((u) => u.id === senderId);
-    if (!isParticipant) return res.status(403).json({ message: "Вы не участник чата" });
-
-    const sender = await AppDataSource.getRepository(User).findOne({ where: { id: senderId } });
-    if (!sender) return res.status(404).json({ message: "Пользователь не найден" });
-
-    const message = AppDataSource.getRepository(Message).create({
-      content,
-      chat,
-      sender,
+    const chat = await chatRepo.findOne({
+      where: { chatId },
+      relations: ["users"],
     });
 
-    const saved = await AppDataSource.getRepository(Message).save(message);
+    if (!chat || !chat.users.some((u) => u.id === senderId)) {
+      res.status(403).json({ message: "Нет доступа к чату" });
+      return;
+    }
+
+    const sender = await AppDataSource.getRepository(User).findOne({
+      where: { id: senderId },
+    });
+
+    if (!sender) {
+      res.status(404).json({ message: "Отправитель не найден" });
+      return;
+    }
+
+    const newMessage = AppDataSource.getRepository(Message).create({
+      content,
+      sender,
+      chat,
+    });
+
+    const saved = await AppDataSource.getRepository(Message).save(newMessage);
     sendMessageToChatWithSocket(chatId, saved);
 
     res.status(201).json(saved);
   } catch (err) {
-    console.error("Ошибка при отправке сообщения:", err);
+    console.error("Ошибка отправки сообщения:", err);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
 
-export const updateMessage = async (req: AuthRequest, res: Response) => {
-  const id = +req.params.id;
-  const { content } = req.body;
-  if (!content?.trim()) return res.status(400).json({ message: "Пустой контент" });
-
+export const updateMessage = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const repo = AppDataSource.getRepository(Message);
-    const message = await repo.findOne({ where: { id }, relations: ["sender", "chat"] });
-    if (!message) return res.status(404).json({ message: "Сообщение не найдено" });
+    const messageId = Number(req.params.id);
+    const { content } = req.body;
 
-    if (message.sender.id !== req.user?.id)
-      return res.status(403).json({ message: "Нет прав на редактирование" });
+    if (!content?.trim()) {
+      res.status(400).json({ message: "Пустой контент" });
+      return;
+    }
+
+    const repo = AppDataSource.getRepository(Message);
+    const message = await repo.findOne({
+      where: { id: messageId },
+      relations: ["sender", "chat"],
+    });
+
+    if (!message || message.sender.id !== req.user?.id) {
+      res.status(403).json({ message: "Редактирование запрещено" });
+      return;
+    }
 
     message.content = content;
     message.isEdited = true;
-
     await repo.save(message);
-    io?.to(`chat_${message.chat.chatId}`).emit("message:updated", message);
 
+    io?.to(`chat_${message.chat.chatId}`).emit("message:updated", message);
     res.json(message);
   } catch (err) {
-    console.error("Ошибка редактирования:", err);
+    console.error("Ошибка при обновлении сообщения:", err);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
 
-export const deleteMessage = async (req: AuthRequest, res: Response) => {
-  const id = +req.params.id;
+export const deleteMessage = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
+    const messageId = Number(req.params.id);
     const repo = AppDataSource.getRepository(Message);
-    const message = await repo.findOne({ where: { id }, relations: ["sender", "chat"] });
-    if (!message) return res.status(404).json({ message: "Сообщение не найдено" });
+    const message = await repo.findOne({
+      where: { id: messageId },
+      relations: ["sender", "chat"],
+    });
 
-    if (message.sender.id !== req.user?.id)
-      return res.status(403).json({ message: "Нет прав на удаление" });
+    if (!message || message.sender.id !== req.user?.id) {
+      res.status(403).json({ message: "Удаление запрещено" });
+      return;
+    }
 
     await repo.remove(message);
-    io?.to(`chat_${message.chat.chatId}`).emit("message:deleted", { id });
+    io?.to(`chat_${message.chat.chatId}`).emit("message:deleted", {
+      id: message.id,
+    });
 
     res.status(204).end();
   } catch (err) {
-    console.error("Ошибка при удалении сообщения:", err);
+    console.error("Ошибка удаления сообщения:", err);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };
