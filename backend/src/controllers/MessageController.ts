@@ -169,10 +169,11 @@ export const deleteMessage = async (
       res.status(403).json({ message: "Удаление запрещено" });
       return;
     }
-
+    const deletedId = message.id;
     await repo.remove(message);
+    console.log("📤 emitting message:deleted", { id: deletedId });
     io?.to(`chat_${message.chat.chatId}`).emit("message:deleted", {
-      id: message.id,
+      id: deletedId,
     });
 
     res.status(204).end();

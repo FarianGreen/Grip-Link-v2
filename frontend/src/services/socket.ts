@@ -2,7 +2,7 @@ import { io, Socket } from "socket.io-client";
 import store from "../store/store";
 import {
   addMessage,
-  deleteMessage,
+  messageDelete,
   updateMessage,
   updateChat,
 } from "../store/chatSlice";
@@ -21,7 +21,7 @@ export const initSocket = (): Socket => {
     });
 
     socket.on("connect", () => {
-      console.log("✅ Socket подключен:", socket.id);
+      console.log("✅ Socket подключен:", socket?.id);
     });
 
     socket.on("disconnect", (reason) => {
@@ -43,15 +43,18 @@ export const initSocket = (): Socket => {
     });
 
     socket.on("message:updated", (msg) => {
+      console.log("📩 Сообщение изменено:", msg);
       store.dispatch(updateMessage(msg));
     });
 
     socket.on("message:deleted", ({ id }) => {
-      store.dispatch(deleteMessage(id));
+      console.log("delete")
+      store.dispatch(messageDelete(id));
     });
 
     // 🔄 Чаты
     socket.on("chat:updated", (chat) => {
+      console.log("📩 Пользователи обновлены:", chat);
       store.dispatch(updateChat(chat));
     });
   }

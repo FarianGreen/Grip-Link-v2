@@ -103,8 +103,8 @@ export const editMessageInChat = (messageId: number, content: string) => {
   });
 };
 
-export const deleteMessageInChat = (messageId: number) => {
-  return axiosInstance.delete(`/chats/messages/${messageId}`);
+export const deleteMessageInChat = async (messageId: number) => {
+  return await axiosInstance.delete(`/chats/messages/${messageId}`);
 };
 
 const chatSlice = createSlice({
@@ -137,7 +137,7 @@ const chatSlice = createSlice({
       const index = state.messages.findIndex((m) => m.id === action.payload.id);
       if (index !== -1) state.messages[index] = action.payload;
     },
-    deleteMessage: (state, action: PayloadAction<number>) => {
+    messageDelete: (state, action: PayloadAction<number>) => {
       state.messages = state.messages.filter((m) => m.id !== action.payload);
     },
   },
@@ -167,6 +167,6 @@ export const {
   addMessage,
   updateChat,
   updateMessage,
-  deleteMessage,
+  messageDelete,
 } = chatSlice.actions;
 export default chatSlice.reducer;

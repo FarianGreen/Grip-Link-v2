@@ -17,6 +17,7 @@ const ChatWindow = ({ chatId }: ChatWindowProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
   const { messages } = useSelector((state: RootState) => state.chat);
+
   useJoinChatRoom(chatId);
   useEffect(() => {
     const socket = initSocket();

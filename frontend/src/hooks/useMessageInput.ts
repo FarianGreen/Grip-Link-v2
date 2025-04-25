@@ -1,18 +1,19 @@
 import { useCallback, useMemo, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "../store/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 import { initSocket } from "../services/socket";
-import { addMessage } from "../store/chatSlice";
+
 import { debounce } from "../utils/debounce";
-
-
 
 export const useMessageInput = () => {
   const [message, setMessage] = useState("");
-  const dispatch = useDispatch<AppDispatch>();
+
   const user = useSelector((state: RootState) => state.auth.user);
-  const selectedChatId = useSelector((state: RootState) => state.chat.selectedChatId);
+  const selectedChatId = useSelector(
+    (state: RootState) => state.chat.selectedChatId
+  );
   const chats = useSelector((state: RootState) => state.chat.chats);
+
   const socket = initSocket();
 
   const currentChat = chats.find((chat) => chat.chatId === selectedChatId);
@@ -30,11 +31,14 @@ export const useMessageInput = () => {
     };
 
     socket.emit("sendMessage", msg);
-    dispatch(addMessage({ ...msg, id: Date.now(), createdAt: new Date().toISOString() }));
+
     setMessage("");
   }, [message, user, receiver, selectedChatId]);
 
-  const sendMessage = useMemo(() => debounce(rawSendMessage, 300), [rawSendMessage]);
+  const sendMessage = useMemo(
+    () => debounce(rawSendMessage, 300),
+    [rawSendMessage]
+  );
 
   return {
     message,
