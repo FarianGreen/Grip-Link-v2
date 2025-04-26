@@ -22,14 +22,7 @@ const ChatWindow = ({ chatId }: ChatWindowProps) => {
 
   useJoinChatRoom(chatId);
   useEffect(() => {
-    const socket = initSocket();
-
     if (selectedChatId !== null && currentUserId) {
-      dispatch(fetchMessages(selectedChatId));
-      socket.emit("markAsRead", {
-        chatId: selectedChatId,
-        userId: currentUserId,
-      });
     }
   }, [dispatch, selectedChatId]);
 
