@@ -5,6 +5,7 @@ import {
   messageDelete,
   updateMessage,
   updateChat,
+  markMessagesAsRead,
 } from "../store/chatSlice";
 
 const SOCKET_URL = "http://localhost:5000";
@@ -50,6 +51,10 @@ export const initSocket = (): Socket => {
     socket.on("message:deleted", ({ id }) => {
       console.log("delete")
       store.dispatch(messageDelete(id));
+    });
+
+    socket.on("message:read", ({ userId, messageIds }) => {
+      store.dispatch(markMessagesAsRead({ userId, messageIds }));
     });
 
     // 🔄 Чаты

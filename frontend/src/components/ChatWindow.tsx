@@ -6,6 +6,7 @@ import MessageInput from "./MessageInput";
 import { initSocket } from "../services/socket";
 import MessageItem from "./messageItem/MessageItem";
 import { useJoinChatRoom } from "../hooks/useJoinChatRoom";
+import { useMarkMessagesRead } from "../hooks/useMarkMessagesRead";
 
 interface ChatWindowProps {
   chatId: number | null;
@@ -13,6 +14,7 @@ interface ChatWindowProps {
 
 const ChatWindow = ({ chatId }: ChatWindowProps) => {
   const selectedChatId = chatId;
+  useMarkMessagesRead(chatId);
 
   const dispatch = useDispatch<AppDispatch>();
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);

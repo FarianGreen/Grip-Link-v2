@@ -4,6 +4,7 @@ import { Message } from "../entities/Message";
 import { Chat } from "../entities/Chat";
 import { User } from "../entities/User";
 import { io, sendMessageToChatWithSocket } from "../websocket";
+import { In } from "typeorm";
 
 interface AuthRequest extends Request {
   user?: { id: number; role: "user" | "admin" };
@@ -36,6 +37,7 @@ export const getChatMessages = async (
       .createQueryBuilder("message")
       .leftJoinAndSelect("message.sender", "sender")
       .leftJoinAndSelect("message.receiver", "receiver")
+      .leftJoinAndSelect("message.readBy", "readBy")
       .where("message.chatId = :chatId", { chatId })
       .orderBy("message.createdAt", "ASC")
       .getMany();
@@ -44,7 +46,6 @@ export const getChatMessages = async (
       id: msg.id,
       content: msg.content,
       createdAt: msg.createdAt,
-      isRead: msg.isRead,
       isEdited: msg.isEdited,
       sender: msg.sender && {
         id: msg.sender.id,
@@ -58,6 +59,13 @@ export const getChatMessages = async (
         email: msg.receiver.email,
         avatar: msg.receiver.avatar,
       },
+      readBy:
+        msg.readBy?.map((user) => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+        })) || [],
     }));
 
     res.json(result);
@@ -179,6 +187,57 @@ export const deleteMessage = async (
     res.status(204).end();
   } catch (err) {
     console.error("Ошибка удаления сообщения:", err);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
+};
+
+export const markMessagesAsRead = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  const { messageIds }: { messageIds: number[] } = req.body;
+  const chatId = Number(req.params.chatId);
+  const userId = req.user?.id;
+
+  if (!userId || !Array.isArray(messageIds) || isNaN(chatId)) {
+    res.status(400).json({ message: "Неверные параметры запроса" });
+    return;
+  }
+
+  try {
+    const userRepo = AppDataSource.getRepository(User);
+    const messageRepo = AppDataSource.getRepository(Message);
+
+    const user = await userRepo.findOneBy({ id: userId });
+    if (!user) {
+      res.status(404).json({ message: "Пользователь не найден" });
+      return;
+    }
+
+    const messages = await messageRepo.find({
+      where: { id: In(messageIds), chat: { chatId } },
+      relations: ["readBy"],
+    });
+
+    const unreadMessages = messages.filter(
+      (msg) => !msg.readBy.some((u) => u.id === userId)
+    );
+
+    for (const msg of unreadMessages) {
+      msg.readBy.push(user);
+      await messageRepo.save(msg);
+    }
+
+    io?.to(`chat_${chatId}`).emit("message:read", {
+      userId,
+      messageIds: unreadMessages.map((m) => m.id),
+    });
+
+    res
+      .status(200)
+      .json({ message: "Прочитано", updated: unreadMessages.length });
+  } catch (err) {
+    console.error("Ошибка пометки сообщений прочитанными:", err);
     res.status(500).json({ message: "Ошибка сервера" });
   }
 };

@@ -8,13 +8,23 @@ interface User {
 }
 
 interface Message {
-  sender: User;
   id: number;
   content: string;
-  senderId: number;
   createdAt: string;
-  isRead?: boolean;
-  isEdited?: boolean;
+  sender: {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  receiver?: {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  readBy: { id: number }[];
+  isEdited: boolean;
 }
 
 interface Chat {
@@ -107,6 +117,12 @@ export const deleteMessageInChat = async (messageId: number) => {
   return await axiosInstance.delete(`/chats/messages/${messageId}`);
 };
 
+export const markMessagesRead = (chatId: number, messageIds: number[]) => {
+  return axiosInstance.patch(`/chats/${chatId}/messages/mark-as-read`, {
+    messageIds,
+  });
+};
+
 const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -140,6 +156,19 @@ const chatSlice = createSlice({
     messageDelete: (state, action: PayloadAction<number>) => {
       state.messages = state.messages.filter((m) => m.id !== action.payload);
     },
+    markMessagesAsRead: (
+      state,
+      { payload }: PayloadAction<{ userId: number; messageIds: number[] }>
+    ) => {
+      for (const msg of state.messages) {
+        if (payload.messageIds.includes(msg.id)) {
+          if (!msg.readBy) msg.readBy = [];
+          if (!msg.readBy.some((u) => u.id === payload.userId)) {
+            msg.readBy.push({ id: payload.userId });
+          }
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -168,5 +197,6 @@ export const {
   updateChat,
   updateMessage,
   messageDelete,
+  markMessagesAsRead
 } = chatSlice.actions;
 export default chatSlice.reducer;

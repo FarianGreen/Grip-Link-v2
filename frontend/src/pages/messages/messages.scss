@@ -130,6 +130,11 @@
     background: lighten($background, 10%);
   }
 }
+.message-status {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
 
 .message-input {
   display: flex;

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Modal from "../Modal/Modal";
 import EditMessageModal from "../Modal/EditMessageModal";
 import { deleteMessageInChat } from "../../store/chatSlice";
+import MessageStatus from "../messageStatus/MessageStatus";
 
 interface User {
   id: number;
@@ -10,13 +11,24 @@ interface User {
   email: string;
 }
 interface Message {
-  sender: User;
+  isRead: any;
   id: number;
   content: string;
-  senderId: number;
   createdAt: string;
-  isRead?: boolean;
-  isEdited?: boolean;
+  sender: {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  receiver?: {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  readBy?: { id: number }[];
+  isEdited: boolean;
 }
 interface Props {
   message: Message;
@@ -59,6 +71,11 @@ const MessageItem = ({ message, currentUserId }: Props) => {
           )}
         </div>
         <p>{message.content}</p>
+        <MessageStatus
+          isSentByMe={isSentByMe}
+          readBy={message.readBy}
+          currentUserId={currentUserId}
+        />
         {message.isEdited && <small className="edited-label">(ред.)</small>}
       </motion.div>
 

@@ -47,30 +47,6 @@ export const setupWebSocket = (server: HttpServer): void => {
         console.error("❌ Ошибка sendMessage:", err);
       }
     });
-
-    // Mark as read
-    socket.on("markAsRead", async ({ chatId, userId }: MarkAsReadPayload) => {
-      try {
-        const result = await AppDataSource.getRepository(Message).update(
-          {
-            chat: { chatId },
-            receiver: { id: userId },
-            isRead: false,
-          },
-          { isRead: true }
-        );
-
-        if (result.affected && result.affected > 0) {
-          console.log(`✅ ${result.affected} прочитано в чате ${chatId}`);
-        }
-      } catch (err) {
-        console.error("❌ Ошибка markAsRead:", err);
-      }
-    });
-
-    socket.on("disconnect", () => {
-      console.log(`🔌 Socket отключен: ${socket.id}`);
-    });
   });
 };
 
