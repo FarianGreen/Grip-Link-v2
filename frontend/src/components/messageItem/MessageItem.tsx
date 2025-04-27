@@ -11,22 +11,11 @@ interface User {
   email: string;
 }
 interface Message {
-  isRead: any;
   id: number;
   content: string;
   createdAt: string;
-  sender: {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string | null;
-  };
-  receiver?: {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string | null;
-  };
+  sender: User;
+  receiver?: User;
   readBy?: { id: number }[];
   isEdited: boolean;
 }
@@ -57,9 +46,7 @@ const MessageItem = ({ message, currentUserId }: Props) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className={`message ${isSentByMe ? "sent" : "received"} ${
-          !message.isRead ? "unread" : ""
-        }`}
+        className={`message ${isSentByMe ? "sent" : "received"}`}
       >
         <div className="message-header">
           <strong>{message.sender.name}</strong>

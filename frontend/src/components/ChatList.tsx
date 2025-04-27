@@ -11,16 +11,16 @@ import { RootState, AppDispatch } from "../store/store";
 import { useModal } from "../hooks/useModal";
 import Modal from "./Modal/Modal";
 import AddUsersModal from "./Modal/AddUsersModal";
+import { useChats } from "../hooks/useChats";
+import { useSelectedChat } from "../hooks/useSelectedChat";
 
 const ChatList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const chats = useSelector((state: RootState) => state.chat.chats);
-  const selectedChatId = useSelector(
-    (state: RootState) => state.chat.selectedChatId
-  );
+  const chats = useChats();
+  const selectedChat = useSelectedChat();
+  const selectedChatId = selectedChat ? selectedChat.chatId : null;
   const users = useSelector((state: RootState) => state.auth.users);
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
-
   const modal = useModal();
 
   useEffect(() => {
@@ -60,7 +60,12 @@ const ChatList: React.FC = () => {
             {chat.lastMessage && (
               <small>Последнее сообщение: {chat.lastMessage.content}</small>
             )}
-            <button onClick={() => handleDeleteChat(chat.chatId)}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteChat(chat.chatId);
+              }}
+            >
               Удалить
             </button>
           </div>

@@ -14,7 +14,6 @@ const MessageStatus: React.FC<MessageStatusProps> = ({
   if (!isSentByMe) return null;
 
   const isRead = readBy?.some((u) => u.id !== currentUserId);
-
   return <span className="message-status">{isRead ? "✅" : "🕑"}</span>;
 };
 

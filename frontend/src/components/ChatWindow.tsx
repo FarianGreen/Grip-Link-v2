@@ -1,35 +1,30 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "../store/store";
-import { fetchMessages } from "../store/chatSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 import MessageInput from "./MessageInput";
-import { initSocket } from "../services/socket";
 import MessageItem from "./messageItem/MessageItem";
-import { useJoinChatRoom } from "../hooks/useJoinChatRoom";
+
 import { useMarkMessagesRead } from "../hooks/useMarkMessagesRead";
+import { useChatLifecycle } from "../hooks/useChatLifecycle";
+import { useChatMessages } from "../hooks/useChatMessages";
+import { useSelectedChat } from "../hooks/useSelectedChat";
 
 interface ChatWindowProps {
   chatId: number | null;
 }
 
 const ChatWindow = ({ chatId }: ChatWindowProps) => {
-  const selectedChatId = chatId;
+  const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
+
+  useChatLifecycle(chatId);
   useMarkMessagesRead(chatId);
 
-  const dispatch = useDispatch<AppDispatch>();
-  const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
-  const { messages } = useSelector((state: RootState) => state.chat);
-
-  useJoinChatRoom(chatId);
-  useEffect(() => {
-    if (selectedChatId !== null && currentUserId) {
-    }
-  }, [dispatch, selectedChatId]);
+  const selectedChatId = useSelectedChat();
+  const messages = useChatMessages();
 
   return (
     <div className="chat-window">
       <div className="chat-window__tools">
-        <h2>Чат #{selectedChatId ?? "не выбран"}</h2>
+        <h2>Чат #{selectedChatId?.chatId ?? "не выбран"}</h2>
       </div>
 
       <div className="messages">
