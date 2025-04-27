@@ -1,4 +1,4 @@
-import ChatList from "../../components/ChatList";
+import ChatList from "../../components/chatList/ChatList";
 import ChatWindow from "../../components/ChatWindow";
 import "./messages.scss";
 import { useSelector } from "react-redux";
