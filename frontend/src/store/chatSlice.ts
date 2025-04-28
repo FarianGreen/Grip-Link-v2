@@ -1,45 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../services/api/axiosInstance";
+import { IChat, IChatState, IMessage } from "@/types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-interface Message {
-  id: number;
-  content: string;
-  createdAt: string;
-  sender: {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string | null;
-  };
-  receiver?: {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string | null;
-  };
-  readBy: { id: number }[];
-  isEdited: boolean;
-}
-
-interface Chat {
-  chatId: number;
-  users: User[];
-  lastMessage?: Message;
-}
-
-interface ChatState {
-  chats: Chat[];
-  selectedChatId: number | null;
-  messages: Message[];
-}
-
-const initialState: ChatState = {
+const initialState: IChatState = {
   chats: [],
   selectedChatId: null,
   messages: [],
@@ -49,7 +12,7 @@ export const fetchChats = createAsyncThunk(
   "chat/fetchChats",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get<Chat[]>("/chats");
+      const response = await axiosInstance.get<IChat[]>("/chats");
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -63,7 +26,7 @@ export const fetchMessages = createAsyncThunk(
   "chat/fetchMessages",
   async (chatId: number, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get<Message[]>(
+      const response = await axiosInstance.get<IMessage[]>(
         `/chats/${chatId}/messages`
       );
       return response.data;
@@ -130,10 +93,10 @@ const chatSlice = createSlice({
     setSelectedChat: (state, action: PayloadAction<number>) => {
       state.selectedChatId = action.payload;
     },
-    addMessage: (state, action: PayloadAction<Message>) => {
+    addMessage: (state, action: PayloadAction<IMessage>) => {
       state.messages.push(action.payload);
     },
-    updateChat: (state, action: PayloadAction<Chat>) => {
+    updateChat: (state, action: PayloadAction<IChat>) => {
       const updated = action.payload;
       const index = state.chats.findIndex(
         (chat) => chat.chatId === updated.chatId
@@ -149,7 +112,7 @@ const chatSlice = createSlice({
         state.chats.push(updated);
       }
     },
-    updateMessage: (state, action: PayloadAction<Message>) => {
+    updateMessage: (state, action: PayloadAction<IMessage>) => {
       const index = state.messages.findIndex((m) => m.id === action.payload.id);
       if (index !== -1) state.messages[index] = action.payload;
     },
@@ -178,7 +141,7 @@ const chatSlice = createSlice({
       .addCase(fetchMessages.fulfilled, (state, action) => {
         state.messages = action.payload;
       })
-      .addCase(createChat.fulfilled, (state, action: PayloadAction<Chat>) => {
+      .addCase(createChat.fulfilled, (state, action: PayloadAction<IChat>) => {
         state.chats.push(action.payload);
       })
       .addCase(deleteChat.fulfilled, (state, action: PayloadAction<number>) => {

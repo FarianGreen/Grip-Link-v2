@@ -23,7 +23,6 @@ const MessageInput: React.FC = () => {
         placeholder="Введите сообщение..."
       />
       <button disabled={!canSend} onClick={sendMessage}>
-
         <SendIcon size={22} color="#fff" />
       </button>
     </div>
