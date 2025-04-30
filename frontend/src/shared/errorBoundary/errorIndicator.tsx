@@ -1,5 +1,5 @@
 import "./index.scss";
-import icon from "../../assets/img/death-star.png";
+import icon from "@/assets/img/death-star.png";
 
 const ErrorIndicator = () => {
   return (

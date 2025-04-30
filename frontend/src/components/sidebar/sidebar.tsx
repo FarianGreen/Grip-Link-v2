@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import "./sidebar.scss";
-import { Path } from "../../constants/Path";
+import { Path } from "@/constants/Path";
 
 export const Sidebar = () => {
   return (

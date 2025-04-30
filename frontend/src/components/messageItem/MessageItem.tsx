@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import Modal from "../Modal/Modal";
-import EditMessageModal from "../Modal/EditMessageModal";
-import { deleteMessageInChat } from "../../store/chatSlice";
-import MessageStatus from "../messageStatus/MessageStatus";
+import Modal from "@/components/Modal/Modal";
+import EditMessageModal from "@/components/Modal/EditMessageModal";
+import { deleteMessageInChat } from "@/store/chatSlice";
+import MessageStatus from "@/components/messageStatus/MessageStatus";
 
 interface User {
   id: number;

@@ -15,5 +15,5 @@ export const useChatLifecycle = (chatId: number | null) => {
     if (chatId && userId) {
       dispatch(fetchMessages(chatId));
     }
-  }, [dispatch, chatId, userId]);
+  }, [chatId, dispatch, userId]);
 };

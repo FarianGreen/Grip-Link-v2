@@ -1,9 +1,9 @@
-import ChatList from "../../components/chatList/ChatList";
-import ChatWindow from "../../components/ChatWindow";
+import ChatList from "@/components/chatList/ChatList";
+import ChatWindow from "@/components/ChatWindow";
 import "./messages.scss";
 import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { withTransition } from "../../utils/withTransition";
+import { RootState } from "@/store/store";
+import { withTransition } from "@/utils/withTransition";
 
 const ChatWindowWithTransition = withTransition(ChatWindow);
 

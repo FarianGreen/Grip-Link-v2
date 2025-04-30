@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import { initSocket } from "../services/socket";
-
-import { debounce } from "../utils/debounce";
+import { RootState } from "@/store/store";
+import { initSocket } from "@/services/socket";
+import { debounce } from "@/utils/debounce";
 
 export const useMessageInput = () => {
   const [message, setMessage] = useState("");
@@ -33,7 +32,7 @@ export const useMessageInput = () => {
     socket.emit("sendMessage", msg);
 
     setMessage("");
-  }, [message, user, receiver, selectedChatId]);
+  }, [message, selectedChatId, user, receiver, socket]);
 
   const sendMessage = useMemo(
     () => debounce(rawSendMessage, 300),

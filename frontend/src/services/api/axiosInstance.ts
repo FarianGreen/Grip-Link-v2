@@ -1,12 +1,12 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import store from "../../store/store";
-import { logout, refreshAccessToken } from "../../store/authSlice";
+import store from "@/store/store";
+import { logout, refreshAccessToken } from "@/store/authSlice";
 
 
 let isRefreshing = false;
 let failedQueue: {
   resolve: (token: string) => void;
-  reject: (err: any) => void;
+  reject: (err: unknown) => void;
 }[] = [];
 
 const processQueue = (error: any, token: string | null = null) => {

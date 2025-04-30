@@ -3,10 +3,10 @@ import { RootState } from "../store/store";
 import MessageInput from "./MessageInput";
 import MessageItem from "./messageItem/MessageItem";
 
-import { useMarkMessagesRead } from "../hooks/useMarkMessagesRead";
-import { useChatLifecycle } from "../hooks/useChatLifecycle";
-import { useChatMessages } from "../hooks/useChatMessages";
-import { useSelectedChat } from "../hooks/useSelectedChat";
+import { useMarkMessagesRead } from "@/hooks/useMarkMessagesRead";
+import { useChatLifecycle } from "@/hooks/useChatLifecycle";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useSelectedChat } from "@/hooks/useSelectedChat";
 
 interface ChatWindowProps {
   chatId: number | null;

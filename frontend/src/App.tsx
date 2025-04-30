@@ -22,7 +22,7 @@ function App() {
     initSocket();
   }, [dispatch]);
 
-  if (isLogined && !user && loading) {
+  if (!isLogined && !user && loading) {
     return <Loader />;
   }
 

@@ -1,10 +1,8 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "../store/store";
-
-
-import { initSocket } from "../services/socket";
-import { markMessagesAsRead, markMessagesRead } from "../store/chatSlice";
+import { RootState, AppDispatch } from "@/store/store";
+import { initSocket } from "@/services/socket";
+import { markMessagesAsRead, markMessagesRead } from "@/store/chatSlice";
 
 export const useMarkMessagesRead = (chatId: number | null) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -26,7 +24,12 @@ export const useMarkMessagesRead = (chatId: number | null) => {
     if (unreadMessageIds.length > 0) {
       markMessagesRead(chatId, unreadMessageIds)
         .then(() => {
-          dispatch(markMessagesAsRead({ userId: currentUser.id, messageIds: unreadMessageIds }));
+          dispatch(
+            markMessagesAsRead({
+              userId: currentUser.id,
+              messageIds: unreadMessageIds,
+            })
+          );
         })
         .catch((err) => {
           console.error("Ошибка отметки сообщений прочитанными:", err);

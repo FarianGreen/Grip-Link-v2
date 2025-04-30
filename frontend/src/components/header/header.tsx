@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import { Path } from "../../constants/Path";
+import { Path } from "@/constants/Path";
 import "./header.scss";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../store/store";
-import { logoutUser } from "../../store/authSlice";
+import { AppDispatch } from "@/store/store";
+import { logoutUser } from "@/store/authSlice";
 
 export const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { AppDispatch, RootState } from "../../store/store";
+import { AppDispatch, RootState } from "@/store/store";
 import "./home.scss";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProfile } from "../../store/profileSlice";
+import { updateProfile } from "@/store/profileSlice";
 
 interface ProfileFormData {
   name: string;
@@ -43,11 +43,11 @@ const HomePage = () => {
     data.append("name", formData.name);
     data.append("bio", formData.bio);
     if (formData.avatar) {
-      data.append("avatar", formData.avatar); // Добавляем аватар
+      data.append("avatar", formData.avatar);
     }
-    // Отправляем данные
-    dispatch(updateProfile(data)); // Отправляем с помощью redux
-    handleEditToggle()
+
+    dispatch(updateProfile(data));
+    handleEditToggle();
   };
 
   useEffect(() => {

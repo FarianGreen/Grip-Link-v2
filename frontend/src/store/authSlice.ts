@@ -1,26 +1,12 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../services/api/axiosInstance";
+import axiosInstance from "@/services/api/axiosInstance";
 import { RootState } from "./store";
 import { showNotification } from "./notificationsSlice";
+import { IAuthState } from "@/types";
 
-interface User {
-  bio: string;
-  id: number;
-  name: string;
-  email: string;
-  avatar: string;
-  role: "user" | "admin";
-}
 
-interface AuthState {
-  user: User | null;
-  users: User[];
-  isLogined: boolean;
-  loading: boolean;
-  error: string | null;
-}
 
-const initialState: AuthState = {
+const initialState: IAuthState = {
   user: null,
   users: [],
   isLogined: Boolean(localStorage.getItem("accessToken")),
@@ -159,8 +145,12 @@ const authSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload as string;
       })
+      .addCase(fetchUser.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(fetchUser.fulfilled, (state, action: PayloadAction<User>) => {
         state.user = action.payload;
+        state.loading = false;
       })
       .addCase(refreshAccessToken.fulfilled, (state) => {
         state.isLogined = true;

@@ -6,3 +6,17 @@ export interface IUser {
   avatar: string;
   role: "user" | "admin";
 }
+
+export interface IAuthState {
+  user: IUser | null;
+  users: IUser[];
+  isLogined: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface IProfileState {
+  user: IUser | null;
+  loading: boolean;
+  error: string | null;
+}

@@ -3,12 +3,12 @@ import "./login.scss";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../store/store";
-import { loginUser } from "../../store/authSlice";
+import { AppDispatch, RootState } from "@/store/store";
+import { loginUser } from "@/store/authSlice";
 import { useNavigate, Link } from "react-router-dom";
-import { Path } from "../../constants/Path";
-import { loginSchema, LoginSchemaType } from "../../shared/loginSchema";
-import FormInput from "../../components/formInput/FormInput";
+import { Path } from "@/constants/Path";
+import { loginSchema, LoginSchemaType } from "@/shared/loginSchema";
+import FormInput from "@/components/formInput/FormInput";
 
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();

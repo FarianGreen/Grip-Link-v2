@@ -16,7 +16,7 @@ export const Layout = () => {
     if (!isLogined) {
       navigate(Path.login);
     }
-  },[isLogined]);
+  },[isLogined, navigate]);
   return (
     <>
       <Header />

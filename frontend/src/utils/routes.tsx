@@ -1,12 +1,12 @@
 import { lazy } from "react";
 import { withBoundedSuspense } from "./withBoundedSuspense";
-import { Layout } from "../layout";
-import { Path } from "../constants/Path";
+import { Layout } from "@/layout";
+import { Path } from "@/constants/Path";
 
-const MessagesPage = lazy(() => import("../pages/messages/Messages"));
-const RegisterForm = lazy(() => import("../pages/register/Register"));
-const LoginForm = lazy(() => import("../pages/login/Login"));
-const HomePage = lazy(() => import("../pages/home/Home"));
+const MessagesPage = lazy(() => import("@/pages/messages/Messages"));
+const RegisterForm = lazy(() => import("@/pages/register/Register"));
+const LoginForm = lazy(() => import("@/pages/login/Login"));
+const HomePage = lazy(() => import("@/pages/home/Home"));
 
 const routes = [
   {

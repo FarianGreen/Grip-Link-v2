@@ -1,22 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axiosInstance from "../services/api/axiosInstance";
+import axiosInstance from "@/services/api/axiosInstance";
 import { RootState } from "./store";
+import { IProfileState, IUser } from "@/types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  bio: string;
-  role: "user" | "admin";
-}
-
-interface ProfileState {
-  user: User | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const initialState: ProfileState = {
+const initialState: IProfileState = {
   user: null,
   loading: false,
   error: null,
@@ -43,7 +30,7 @@ const profileSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateProfile.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(updateProfile.fulfilled, (state, action: PayloadAction<IUser>) => {
         state.loading = false;
         state.user = action.payload;
       })

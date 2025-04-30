@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { editMessageInChat } from "../../store/chatSlice";
+import { editMessageInChat } from "@/store/chatSlice";
 
 interface EditMessageModalProps {
   messageId: number;
