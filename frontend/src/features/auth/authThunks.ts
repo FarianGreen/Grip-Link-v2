@@ -3,6 +3,7 @@ import { showNotification } from "@/features/notice/notificationsSlice";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { logout } from "./authSlice";
 import { extractErrorMessage } from "@/helpers/ErrorWithMessage";
+import axios from "axios";
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
@@ -65,14 +66,19 @@ export const refreshAccessToken = createAsyncThunk(
   "auth/refreshAccessToken",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/auth/refresh");
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/refresh",
+        {},
+        { withCredentials: true }
+      );
+
       localStorage.setItem("accessToken", response.data.accessToken);
       return { accessToken: response.data.accessToken };
     } catch (error) {
       return rejectWithValue(extractErrorMessage(error));
     }
   }
-);
+)
 
 export const fetchAllUsers = createAsyncThunk(
   "auth/fetchAllUsers",

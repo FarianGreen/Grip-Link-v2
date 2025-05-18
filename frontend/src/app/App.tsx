@@ -14,31 +14,28 @@ function App() {
   const { user, isLogined, loading } = useSelector(
     (state: RootState) => state.auth
   );
+  console.log(loading)
 
-  // Получаем пользователя при монтировании, если его нет
   useEffect(() => {
     if (!user) {
       dispatch(fetchUser());
     }
   }, [user, dispatch]);
 
-  // Инициализация сокета один раз
   useEffect(() => {
     initSocket();
   }, []);
 
-  // Редирект если не залогинен
   useEffect(() => {
     if (!isLogined && !user && !loading) {
       navigate(Path.login);
     }
   }, [isLogined, user, loading, navigate]);
 
-  // Показываем Loader если идет загрузка
-  // if (loading) {
-  //   console.log(loading)
-  //   return <Loader />;
-  // }
+  if (loading) {
+    console.log(loading)
+    return <Loader />;
+  }
 
   return <AnimatedRoutes />;
 }

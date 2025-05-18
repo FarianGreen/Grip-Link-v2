@@ -29,6 +29,10 @@ const authSlice = createSlice({
       state.loading = false;
       localStorage.removeItem("accessToken");
     },
+    resetAuthState: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -60,6 +64,7 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload as string;
+        state.loading = false;
       })
       .addCase(fetchUser.pending, (state) => {
         state.loading = true;
@@ -68,12 +73,21 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.loading = false;
       })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      .addCase(refreshAccessToken.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(refreshAccessToken.fulfilled, (state) => {
         state.isLogined = true;
+        state.loading = false;
       })
       .addCase(refreshAccessToken.rejected, (state) => {
         state.isLogined = false;
         state.user = null;
+        state.loading = false;
       })
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
@@ -98,11 +112,12 @@ const authSlice = createSlice({
         fetchAllUsers.fulfilled,
         (state, action: PayloadAction<IUser[]>) => {
           state.users = action.payload;
+          state.loading = false;
         }
       );
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, resetAuthState } = authSlice.actions;
 export default authSlice.reducer;
 export const selectAuth = (state: RootState) => state.auth;
