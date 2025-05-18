@@ -3,8 +3,8 @@ import { Path } from "@/constants/Path";
 import "./header.scss";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
-import { logoutUser } from "@/store/authSlice";
+import { AppDispatch } from "@/app/store";
+import { logoutUser } from "@/features/auth/authThunks";
 
 export const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
-import { fetchMessages } from "../store/chatSlice";
+import { AppDispatch, RootState } from "@/app/store";
 import { useJoinChatRoom } from "./useJoinChatRoom";
+import { fetchMessages } from "@/features/chat/chatThunks";
 
 
 export const useChatLifecycle = (chatId: number | null) => {

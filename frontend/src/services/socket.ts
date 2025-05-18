@@ -1,12 +1,12 @@
 import { io, Socket } from "socket.io-client";
-import store from "../store/store";
 import {
   addMessage,
   messageDelete,
   updateMessage,
   updateChat,
   markMessagesAsRead,
-} from "../store/chatSlice";
+} from "@/features/chat/chatSlice";
+import store from "@/app/store";
 
 const SOCKET_URL = "http://localhost:5000";
 

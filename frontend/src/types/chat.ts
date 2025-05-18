@@ -12,3 +12,7 @@ export interface IChatState {
   selectedChatId: number | null;
   messages: IMessage[];
 }
+export interface ErrorResponse {
+  message: string;
+  statusCode?: number;
+}

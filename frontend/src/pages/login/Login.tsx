@@ -3,12 +3,12 @@ import "./login.scss";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
-import { loginUser } from "@/store/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { Path } from "@/constants/Path";
 import { loginSchema, LoginSchemaType } from "@/shared/loginSchema";
 import FormInput from "@/components/formInput/FormInput";
+import { AppDispatch, RootState } from "@/app/store";
+import { loginUser } from "@/features/auth/authThunks";
 
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -53,7 +53,7 @@ const Login = () => {
               {...register("password")}
               error={errors.password}
             />
-            <button className="login-button" type="submit" disabled={loading}>
+            <button className="login-button" type="submit" >
               {loading ? "Загрузка..." : "Войти"}
             </button>
             {error && <p className="error">{error}</p>}

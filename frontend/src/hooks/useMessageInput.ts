@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import { initSocket } from "@/services/socket";
 import { debounce } from "@/utils/debounce";
+import { RootState } from "@/app/store";
 
 export const useMessageInput = () => {
   const [message, setMessage] = useState("");

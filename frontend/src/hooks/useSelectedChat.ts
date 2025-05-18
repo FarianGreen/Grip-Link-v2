@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import { useMemo } from "react";
+import { RootState } from "@/app/store";
 
 export const useSelectedChat = () => {
   const { selectedChatId, chats } = useSelector((state: RootState) => state.chat);

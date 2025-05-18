@@ -1,7 +1,9 @@
 import { lazy } from "react";
 import { withBoundedSuspense } from "./withBoundedSuspense";
-import { Layout } from "@/layout";
+
 import { Path } from "@/constants/Path";
+import { Layout } from "@/app/layout";
+
 
 const MessagesPage = lazy(() => import("@/pages/messages/Messages"));
 const RegisterForm = lazy(() => import("@/pages/register/Register"));

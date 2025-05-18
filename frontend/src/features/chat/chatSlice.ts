@@ -1,89 +1,11 @@
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../services/api/axiosInstance";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IChat, IChatState, IMessage } from "@/types";
+import { createChat, deleteChat, fetchChats, fetchMessages } from "./chatThunks";
 
 const initialState: IChatState = {
   chats: [],
   selectedChatId: null,
   messages: [],
-};
-
-export const fetchChats = createAsyncThunk(
-  "chat/fetchChats",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.get<IChat[]>("/chats");
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Ошибка загрузки чатов"
-      );
-    }
-  }
-);
-
-export const fetchMessages = createAsyncThunk(
-  "chat/fetchMessages",
-  async (chatId: number, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.get<IMessage[]>(
-        `/chats/${chatId}/messages`
-      );
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Ошибка загрузки сообщений"
-      );
-    }
-  }
-);
-
-export const createChat = createAsyncThunk(
-  "chats/create",
-  async (userIds: number[], { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post("/chats", { userIds });
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Ошибка при создании чата"
-      );
-    }
-  }
-);
-
-export const deleteChat = createAsyncThunk(
-  "chats/delete",
-  async (chatId: number, { rejectWithValue }) => {
-    try {
-      await axiosInstance.delete(`/chats/${chatId}`);
-      return chatId;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Ошибка при удалении чата"
-      );
-    }
-  }
-);
-
-export const updateChatUsers = (chatId: number, userIds: number[]) => {
-  return axiosInstance.patch(`/chats/${chatId}/users`, { userIds });
-};
-
-export const editMessageInChat = (messageId: number, content: string) => {
-  return axiosInstance.patch(`/chats/messages/${messageId}`, {
-    content,
-  });
-};
-
-export const deleteMessageInChat = async (messageId: number) => {
-  return await axiosInstance.delete(`/chats/messages/${messageId}`);
-};
-
-export const markMessagesRead = (chatId: number, messageIds: number[]) => {
-  return axiosInstance.patch(`/chats/${chatId}/messages/mark-as-read`, {
-    messageIds,
-  });
 };
 
 const chatSlice = createSlice({

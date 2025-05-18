@@ -1,14 +1,14 @@
 import "./register.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { loginUser, registerUser } from "@/store/authSlice";
-import { AppDispatch, RootState } from "@/store/store";
 import { Path } from "@/constants/Path";
 import { RegisterFormData, registerSchema } from "@/shared/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import FormInput from "@/components/formInput/FormInput";
-import { fetchChats } from "@/store/chatSlice";
+import { AppDispatch, RootState } from "@/app/store";
+import { loginUser, registerUser } from "@/features/auth/authThunks";
+import { fetchChats } from "@/features/chat/chatThunks";
 
 const Register = () => {
   const dispatch = useDispatch<AppDispatch>();

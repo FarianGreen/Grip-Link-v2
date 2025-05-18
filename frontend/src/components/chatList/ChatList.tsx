@@ -1,13 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchChats,
-  createChat,
-  deleteChat,
-  setSelectedChat,
-} from "../../store/chatSlice";
-import { fetchAllUsers } from "../../store/authSlice";
-import { RootState, AppDispatch } from "../../store/store";
+
+
 import { useModal } from "../../hooks/useModal";
 import Modal from "../Modal/Modal";
 import AddUsersModal from "../Modal/AddUsersModal";
@@ -15,6 +9,10 @@ import { useChats } from "../../hooks/useChats";
 import { useSelectedChat } from "../../hooks/useSelectedChat";
 import { ChatListItems } from "./ChatItems";
 import { CreateChat } from "./CreateChat";
+import { AppDispatch, RootState } from "@/app/store";
+import { createChat, deleteChat, fetchChats } from "@/features/chat/chatThunks";
+import { fetchAllUsers } from "@/features/auth/authThunks";
+import { setSelectedChat } from "@/features/chat/chatSlice";
 
 const ChatList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

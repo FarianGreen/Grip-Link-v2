@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "@/store/store";
 import { initSocket } from "@/services/socket";
-import { markMessagesAsRead, markMessagesRead } from "@/store/chatSlice";
+import { markMessagesAsRead, } from "@/features/chat/chatSlice";
+import { AppDispatch, RootState } from "@/app/store";
+import { markMessagesRead } from "@/features/chat/chatApi";
 
 export const useMarkMessagesRead = (chatId: number | null) => {
   const dispatch = useDispatch<AppDispatch>();

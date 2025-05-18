@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import "./modal.scss";
-import { updateChatUsers } from "@/store/chatSlice";
+import { updateChatUsers } from "@/features/chat/chatApi";
+import { RootState } from "@/app/store";
+
 
 interface Props {
   chatId: number;

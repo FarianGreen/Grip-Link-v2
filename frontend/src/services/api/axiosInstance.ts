@@ -1,20 +1,20 @@
+import store from "@/app/store";
+import { logout } from "@/features/auth/authSlice";
+import { refreshAccessToken } from "@/features/auth/authThunks";
+import { showNotification } from "@/features/notice/notificationsSlice";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import store from "@/store/store";
-import { logout, refreshAccessToken } from "@/store/authSlice";
 
 
 let isRefreshing = false;
 let failedQueue: {
   resolve: (token: string) => void;
-  reject: (err: unknown) => void;
+  reject: (err: any) => void;
 }[] = [];
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(prom => {
-    if (error) prom.reject(error);
-    else prom.resolve(token!);
+    error ? prom.reject(error) : prom.resolve(token!);
   });
-
   failedQueue = [];
 };
 
@@ -35,8 +35,10 @@ axiosInstance.interceptors.response.use(
   res => res,
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const status = error.response?.status;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // ⏳ Access token refresh
+    if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
@@ -59,7 +61,6 @@ axiosInstance.interceptors.response.use(
         const result: any = await store.dispatch(refreshAccessToken()).unwrap();
         const newToken = result.accessToken;
         localStorage.setItem("accessToken", newToken);
-
         processQueue(null, newToken);
         isRefreshing = false;
 
@@ -72,11 +73,20 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         isRefreshing = false;
-
-        // Принудительно разлогиниваем
         store.dispatch(logout());
         return Promise.reject(err);
       }
+    }
+
+    // 🧠 Centralized error reporting
+    if (status === 403) {
+      store.dispatch(showNotification({ type: "error", message: "Нет доступа" }));
+    } else if (status === 404) {
+      store.dispatch(showNotification({ type: "error", message: "Ресурс не найден" }));
+    } else if (status === 422) {
+      store.dispatch(showNotification({ type: "error", message: "Ошибка валидации" }));
+    } else if (status === 500) {
+      store.dispatch(showNotification({ type: "error", message: "Ошибка сервера" }));
     }
 
     return Promise.reject(error);

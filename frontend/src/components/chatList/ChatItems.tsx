@@ -1,9 +1,6 @@
 import { IChat } from "@/types";
 import React from "react";
 
-
-
-
 interface ChatItemsProps {
   chats: IChat[];
   selectedChatId: number | null;

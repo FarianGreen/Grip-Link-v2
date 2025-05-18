@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { AppDispatch, RootState } from "@/store/store";
+import { AppDispatch, RootState } from "@/app/store";
 import "./home.scss";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProfile } from "@/store/profileSlice";
+import { updateProfile } from "@/features/profile/profileThunk";
 
 interface ProfileFormData {
   name: string;

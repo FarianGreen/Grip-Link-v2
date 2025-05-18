@@ -2,25 +2,12 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Modal from "@/components/Modal/Modal";
 import EditMessageModal from "@/components/Modal/EditMessageModal";
-import { deleteMessageInChat } from "@/store/chatSlice";
 import MessageStatus from "@/components/messageStatus/MessageStatus";
+import { deleteMessageInChat } from "@/features/chat/chatApi";
+import { IMessage } from "@/types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-interface Message {
-  id: number;
-  content: string;
-  createdAt: string;
-  sender: User;
-  receiver?: User;
-  readBy?: { id: number }[];
-  isEdited: boolean;
-}
 interface Props {
-  message: Message;
+  message: IMessage;
   currentUserId: number;
 }
 

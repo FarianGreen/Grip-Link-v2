@@ -1,21 +1,17 @@
+import { IChat, IUser } from "@/types";
 import React from "react";
 
-interface User {
-  id: number;
-  name: string;
-}
-
-interface Chat {
-  users: User[];
-}
-
 interface CreateChatProps {
-  users: User[];
-  chats: Chat[];
+  users: IUser[];
+  chats: IChat[];
   onCreateChat: (userId: number) => void;
 }
 
-const CreateChatComponent: React.FC<CreateChatProps> = ({ users, chats, onCreateChat }) => {
+const CreateChatComponent: React.FC<CreateChatProps> = ({
+  users,
+  chats,
+  onCreateChat,
+}) => {
   const availableUsers = users.filter(
     (u) => !chats.some((c) => c.users.some((cu) => cu.id === u.id))
   );

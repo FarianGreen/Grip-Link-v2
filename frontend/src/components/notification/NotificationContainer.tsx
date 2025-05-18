@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import "./notification.scss";
-import { clearNotification } from "@/store/notificationsSlice";
+import { clearNotification } from "@/features/notice/notificationsSlice";
+import { RootState } from "@/app/store";
 
 export const Notification: React.FC = () => {
   const dispatch = useDispatch();
