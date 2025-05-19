@@ -1,18 +1,33 @@
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from "axios";
 import store from "@/app/store";
 import { logout, resetAuthState } from "@/features/auth/authSlice";
 import { refreshAccessToken } from "@/features/auth/authThunks";
 import { showNotification } from "@/features/notice/notificationsSlice";
 
-// Глобальные переменные
-let isRefreshing = false;
-let failedQueue: {
-  resolve: (token: string) => void;
-  reject: (error: any) => void;
-}[] = [];
+// Тип для расширенного запроса с признаком повторной попытки
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
-// Очередь повторных запросов при обновлении токена
-const processQueue = (error: any, token: string | null = null) => {
+// Результат успешного refreshAccessToken
+interface RefreshPayload {
+  accessToken: string;
+}
+
+// Очередь неудачных запросов
+type FailedRequest = {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+};
+
+let isRefreshing = false;
+let failedQueue: FailedRequest[] = [];
+
+// Обработка очереди
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
@@ -23,29 +38,28 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Создание axios-инстанса
+// Инстанс axios
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
   withCredentials: true,
 });
 
-// Интерцептор запроса: вставляем токен
-axiosInstance.interceptors.request.use(config => {
+// Добавляем токен в заголовки
+axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem("accessToken");
-  if (token && config.headers) {
+  if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Интерцептор ответа
+// Обработка ответа
 axiosInstance.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as CustomAxiosRequestConfig;
     const status = error.response?.status;
 
-    // Только если 401 и ещё не пробовали повторить
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -53,8 +67,6 @@ axiosInstance.interceptors.response.use(
             resolve: (token: string) => {
               if (originalRequest.headers) {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
-              } else {
-                originalRequest.headers = { Authorization: `Bearer ${token}` };
               }
               resolve(axiosInstance(originalRequest));
             },
@@ -66,56 +78,54 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-try {
-  const actionResult = await store.dispatch(refreshAccessToken());
+      try {
+        const actionResult = await store.dispatch(refreshAccessToken());
 
-  if (refreshAccessToken.rejected.match(actionResult)) {
-    throw actionResult.payload || new Error("Ошибка обновления токена");
-  }
+        if (refreshAccessToken.rejected.match(actionResult)) {
+          throw actionResult.payload || new Error("Ошибка обновления токена");
+        }
 
-  const newToken = (actionResult.payload as { accessToken: string }).accessToken;
+        const { accessToken } = actionResult.payload as RefreshPayload;
 
-  localStorage.setItem("accessToken", newToken);
-  processQueue(null, newToken);
-  isRefreshing = false;
+        localStorage.setItem("accessToken", accessToken);
+        processQueue(null, accessToken);
+        isRefreshing = false;
 
-  if (originalRequest.headers) {
-    originalRequest.headers.Authorization = `Bearer ${newToken}`;
-  } else {
-    originalRequest.headers = { Authorization: `Bearer ${newToken}` };
-  }
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
 
-  return axiosInstance(originalRequest);
-} catch (refreshError: any) {
-  processQueue(refreshError, null);
-  isRefreshing = false;
+        return axiosInstance(originalRequest);
+      } catch (refreshError: unknown) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
 
-  store.dispatch(logout());
-  store.dispatch(resetAuthState());
+        store.dispatch(logout());
+        store.dispatch(resetAuthState());
 
-  if (axios.isAxiosError(refreshError)) {
-    return Promise.reject(refreshError);
-  }
+        if (axios.isAxiosError(refreshError)) {
+          return Promise.reject(refreshError);
+        }
 
-  const fallbackError = new axios.AxiosError(
-    "Ошибка обновления токена",
-    "TOKEN_REFRESH_FAILED",
-    originalRequest,
-    null,
-    {
-      status: 401,
-      data: { message: "Ошибка обновления токена" },
-      statusText: "Unauthorized",
-      headers: {},
-      config: originalRequest,
-    }
-  );
+        const fallbackError = new axios.AxiosError(
+          "Ошибка обновления токена",
+          "TOKEN_REFRESH_FAILED",
+          originalRequest,
+          null,
+          {
+            status: 401,
+            data: { message: "Ошибка обновления токена" },
+            statusText: "Unauthorized",
+            headers: {},
+            config: originalRequest,
+          }
+        );
 
-  return Promise.reject(fallbackError);
-}
+        return Promise.reject(fallbackError);
+      }
     }
 
-    // Обработка общих ошибок
+    // Централизованная обработка ошибок
     switch (status) {
       case 403:
         store.dispatch(showNotification({ type: "error", message: "Нет доступа" }));
@@ -131,7 +141,6 @@ try {
         break;
     }
 
-    // Всегда пробрасываем ошибку дальше
     return Promise.reject(error);
   }
 );
