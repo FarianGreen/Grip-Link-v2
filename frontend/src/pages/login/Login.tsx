@@ -6,9 +6,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { Path } from "@/constants/Path";
 import { loginSchema, LoginSchemaType } from "@/shared/validationsSchems/loginSchema";
-import FormInput from "@/shared/ui/input/Input";
+import Input from "@/shared/ui/input/Input";
 import { AppDispatch, RootState } from "@/app/store";
 import { loginUser } from "@/features/auth/authThunks";
+import { PasswordInput } from "@/shared/ui/PasswordInput";
 
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -40,16 +41,14 @@ const Login = () => {
       <div className="animation-card">
         <div className="card-content">
           <h2>Вход</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FormInput
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <Input
               label="Email"
-              type="email"
               {...register("email")}
               error={errors.email}
             />
-            <FormInput
+            <PasswordInput
               label="Пароль"
-              type="password"
               {...register("password")}
               error={errors.password}
             />
@@ -59,7 +58,7 @@ const Login = () => {
             {error && <p className="error">{error}</p>}
           </form>
           <p className="from-link">
-            Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+            Нет аккаунта? <Link to={Path.register}>Зарегистрироваться</Link>
           </p>
         </div>
       </div>

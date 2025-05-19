@@ -94,7 +94,6 @@ a{
     font-size: 16px;
     transition: $transition;
     width: 100%;
-    margin-bottom: 16px;
 
     &:focus {
       border-color: $primary-color;
@@ -129,7 +128,11 @@ a {
     text-decoration: underline;
   }
 }
-
+.form{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 .from-link {
   text-align: center;
   margin-top: 10px;

@@ -5,10 +5,11 @@ import { Path } from "@/constants/Path";
 import { RegisterFormData, registerSchema } from "@/shared/validationsSchems/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import FormInput from "@/shared/ui/input/Input";
+import Input from "@/shared/ui/input/Input";
 import { AppDispatch, RootState } from "@/app/store";
 import { loginUser, registerUser } from "@/features/auth/authThunks";
 import { fetchChats } from "@/features/chat/chatThunks";
+import { PasswordInput } from "@/shared/ui/PasswordInput";
 
 const Register = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,22 +44,21 @@ const Register = () => {
         <div className="card-content">
           <h2>Регистрация</h2>
           {error && <p className="error">{error}</p>}
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FormInput
+          <form className="form" onSubmit={handleSubmit(onSubmit)}>
+            <Input
               label="Имя"
               type="text"
               {...register("name")}
               error={errors.name}
             />
-            <FormInput
+            <Input
               label="Email"
               type="email"
               {...register("email")}
               error={errors.email}
             />
-            <FormInput
+            <PasswordInput
               label="Пароль"
-              type="password"
               {...register("password")}
               error={errors.password}
             />
@@ -67,7 +67,7 @@ const Register = () => {
             </button>
           </form>
           <p className="from-link">
-            Уже есть аккаунт? <Link to="/login">Войти</Link>
+            Уже есть аккаунт? <Link to={Path.login}>Войти</Link>
           </p>
         </div>
       </div>

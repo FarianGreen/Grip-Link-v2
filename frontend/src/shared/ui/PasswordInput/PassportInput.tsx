@@ -22,13 +22,13 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ label, name, error, ...re
           className={styles.input}
           {...rest}
         />
-        <button
-          type="button"
+        <div
+          
           className={styles.toggle}
           onClick={toggleVisibility}
         >
           {visible ? "🙈" : "👁️"}
-        </button>
+        </div>
       </div>
       {error && <span className={styles.error}>{error}</span>}
     </div>
