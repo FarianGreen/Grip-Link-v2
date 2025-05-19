@@ -5,7 +5,7 @@ import { Path } from "@/constants/Path";
 import { RegisterFormData, registerSchema } from "@/shared/validationsSchems/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import FormInput from "@/shared/ui/input/FormInput";
+import FormInput from "@/shared/ui/input/Input";
 import { AppDispatch, RootState } from "@/app/store";
 import { loginUser, registerUser } from "@/features/auth/authThunks";
 import { fetchChats } from "@/features/chat/chatThunks";

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { Path } from "@/constants/Path";
 import { loginSchema, LoginSchemaType } from "@/shared/validationsSchems/loginSchema";
-import FormInput from "@/shared/ui/input/FormInput";
+import FormInput from "@/shared/ui/input/Input";
 import { AppDispatch, RootState } from "@/app/store";
 import { loginUser } from "@/features/auth/authThunks";
 
