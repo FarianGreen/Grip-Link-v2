@@ -17,7 +17,7 @@
   box-shadow: $box-shadow-light;
   padding: 0 $spacing-medium;
   border-bottom: 2px solid $border-color;
-  
+
   &__inner {
     display: flex;
     align-items: center;
@@ -63,7 +63,10 @@
       color: white;
     }
   }
-  .header-logout-btn{
+  .header-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     border: 2px solid $border-color;
     box-shadow: $box-shadow-light;
   }

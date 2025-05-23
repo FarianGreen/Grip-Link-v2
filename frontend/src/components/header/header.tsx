@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/app/store";
 import { logoutUser } from "@/features/auth/authThunks";
+import { LogoutIcon } from "../Icons";
 
 export const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export const Header = () => {
         <div className="header__side">
           <button className="header-logout-btn" onClick={() => handleLogOut()}>
             Выйти
+            <LogoutIcon size={24} color="white" className="ml-auto" />
           </button>
         </div>
       </div>
