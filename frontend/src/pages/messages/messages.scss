@@ -135,31 +135,21 @@
   font-size: 0.85rem;
   opacity: 0.7;
 }
+.message-info {
+  display: flex;
+  justify-content: space-between;
+}
 
 .message-input {
   display: flex;
   padding: 10px;
   border-top: 1px solid $border-color;
   background-color: $background;
-
+  gap: 0.5rem;
   input {
     flex: 1;
     padding: 8px;
     border: 1px solid $border-color;
     border-radius: 5px;
-  }
-
-  button {
-    margin-left: 10px;
-    padding: 8px 15px;
-    background: $primary-color;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-
-    &:hover {
-      background: darken($primary-color, 10%);
-    }
   }
 }

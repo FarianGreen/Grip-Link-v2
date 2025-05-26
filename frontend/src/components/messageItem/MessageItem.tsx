@@ -5,6 +5,8 @@ import EditMessageModal from "@/components/Modal/EditMessageModal";
 import MessageStatus from "@/components/messageStatus/MessageStatus";
 import { deleteMessageInChat } from "@/features/chat/chatApi";
 import { IMessage } from "@/types";
+import { Button } from "@/shared/ui/button";
+import { DeleteIcon, EditIcon } from "../Icons";
 
 interface Props {
   message: IMessage;
@@ -39,18 +41,24 @@ const MessageItem = ({ message, currentUserId }: Props) => {
           <strong>{message.sender.name}</strong>
           {isSentByMe && (
             <div className="message-actions">
-              <button onClick={handleOpenEdit}>✏️</button>
-              <button onClick={() => handleDelete(message.id)}>🗑</button>
+              <Button size="sm" onClick={handleOpenEdit}>
+                <EditIcon color="white" size={15} />
+              </Button>
+              <Button size="sm" onClick={() => handleDelete(message.id)}>
+                <DeleteIcon color="white" size={14} />
+              </Button>
             </div>
           )}
         </div>
         <p>{message.content}</p>
-        <MessageStatus
-          isSentByMe={isSentByMe}
-          readBy={message.readBy}
-          currentUserId={currentUserId}
-        />
-        {message.isEdited && <small className="edited-label">(ред.)</small>}
+        <div className="message-info">
+          <MessageStatus
+            isSentByMe={isSentByMe}
+            readBy={message.readBy}
+            currentUserId={currentUserId}
+          />
+          {message.isEdited && <small className="edited-label">(ред.)</small>}
+        </div>
       </motion.div>
 
       <Modal isOpen={isEditing} onClose={handleCloseEdit}>

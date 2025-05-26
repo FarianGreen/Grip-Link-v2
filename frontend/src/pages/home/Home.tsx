@@ -3,6 +3,7 @@ import "./home.scss";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProfile } from "@/features/profile/profileThunk";
+import { Button } from "@/shared/ui/button";
 
 interface ProfileFormData {
   name: string;
@@ -105,13 +106,13 @@ const HomePage = () => {
 
         <div className="profile__actions">
           {isEditing ? (
-            <button className="profile__edit-btn" onClick={handleSave}>
+            <Button size="md" className="profile__edit-btn" onClick={handleSave}>
               Сохранить
-            </button>
+            </Button>
           ) : (
-            <button className="profile__edit-btn" onClick={handleEditToggle}>
+            <Button size="md" className="profile__edit-btn" onClick={handleEditToggle}>
               Редактировать профиль
-            </button>
+            </Button>
           )}
         </div>
       </div>
