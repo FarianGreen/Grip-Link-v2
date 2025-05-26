@@ -1,5 +1,7 @@
+import { Button } from "@/shared/ui/button";
 import { IChat } from "@/types";
 import React from "react";
+import { DeleteIcon } from "../Icons";
 
 interface ChatItemsProps {
   chats: IChat[];
@@ -33,13 +35,15 @@ const ChatListItemsComponent: React.FC<ChatItemsProps> = ({
           {chat.lastMessage && (
             <small>Последнее сообщение: {chat.lastMessage.content}</small>
           )}
-          <button
+          <Button
+            size="md"
+            leftIcon={<DeleteIcon size={20} color="white" />}
             onClick={(e) => {
               onDeleteChat(e, chat.chatId);
             }}
           >
             Удалить
-          </button>
+          </Button>
         </div>
       ))}
     </>

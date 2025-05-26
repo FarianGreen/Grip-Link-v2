@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/app/store";
 import { logoutUser } from "@/features/auth/authThunks";
 import { LogoutIcon } from "../Icons";
+import { Button } from "@/shared/ui/button";
 
 export const Header = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
@@ -38,10 +39,16 @@ export const Header = () => {
           ))}
         </ul>
         <div className="header__side">
-          <button className="header-logout-btn" onClick={() => handleLogOut()}>
+          <Button
+            className="header-logout-btn"
+            onClick={() => handleLogOut()}
+            size="md"
+            rightIcon={
+              <LogoutIcon size={24} color="white" className="ml-auto" />
+            }
+          >
             Выйти
-            <LogoutIcon size={24} color="white" className="ml-auto" />
-          </button>
+          </Button>
         </div>
       </div>
     </section>

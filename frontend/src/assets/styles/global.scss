@@ -25,18 +25,21 @@ a {
   color: inherit;
 }
 
-button {
-  border-radius: $border-radius;
-  border: none;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  background-color: $primary-color;
-  color: white;
-  cursor: pointer;
-  transition: background-color $transition;
+// button {
+//   display: flex;
+//   align-items: center;
+//   gap: 1rem;
+//   border-radius: $border-radius;
+//   border: none;
+//   padding: 0.6em 1.2em;
+//   font-size: 1em;
+//   font-weight: 500;
+//   background-color: $primary-color;
+//   color: white;
+//   cursor: pointer;
+//   transition: background-color $transition;
 
-  &:hover {
-    background-color: darken($primary-color, 10%);
-  }
-}
+//   &:hover {
+//     background-color: darken($primary-color, 10%);
+//   }
+// }

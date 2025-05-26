@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-
 import { useModal } from "../../hooks/useModal";
 import Modal from "../Modal/Modal";
 import AddUsersModal from "../Modal/AddUsersModal";
@@ -13,6 +11,8 @@ import { AppDispatch, RootState } from "@/app/store";
 import { createChat, deleteChat, fetchChats } from "@/features/chat/chatThunks";
 import { fetchAllUsers } from "@/features/auth/authThunks";
 import { setSelectedChat } from "@/features/chat/chatSlice";
+import { AddUserIcon } from "../Icons";
+import { Button } from "@/shared/ui/button";
 
 const ChatList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -66,12 +66,14 @@ const ChatList: React.FC = () => {
 
       <CreateChat users={users} chats={chats} onCreateChat={handleCreateChat} />
 
-      <button
+      <Button
         onClick={modal.open}
-        className={`${!selectedChatId ? "disable" : "open-modal-btn"}`}
+        className={!selectedChatId ? "disable" : "open-modal-btn"}
+        size="md"
+        leftIcon={<AddUserIcon size={18} color="white" />}
       >
-        ➕ Добавить пользователя
-      </button>
+        Добавить пользователя
+      </Button>
 
       <Modal isOpen={modal.isOpen} onClose={modal.close}>
         {selectedChatId && (

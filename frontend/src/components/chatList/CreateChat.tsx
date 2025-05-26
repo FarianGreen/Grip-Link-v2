@@ -1,3 +1,4 @@
+import { Button } from "@/shared/ui/button";
 import { IChat, IUser } from "@/types";
 import React from "react";
 
@@ -22,9 +23,9 @@ const CreateChatComponent: React.FC<CreateChatProps> = ({
     <div className="chat-list__create">
       <h3>Создать чат</h3>
       {availableUsers.map((user) => (
-        <button key={user.id} onClick={() => onCreateChat(user.id)}>
+        <Button  onClick={() => onCreateChat(user.id)} size="sm">
           Создать чат с {user.name}
-        </button>
+        </Button>
       ))}
     </div>
   );

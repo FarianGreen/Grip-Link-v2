@@ -1,5 +1,6 @@
 @import "../assets/styles/variables";
 @import "../assets/styles/mixins";
+
 .layout {
   display: flex;
   height: calc(100vh - $header-height);

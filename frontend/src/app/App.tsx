@@ -5,16 +5,17 @@ import { fetchUser } from "@/features/auth/authThunks";
 import { initSocket } from "@/services/socket";
 import Loader from "@/components/Loader/Loader";
 import AnimatedRoutes from "@/utils/AnimatedRoutes";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Path } from "@/constants/Path";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isLogined, loading } = useSelector(
     (state: RootState) => state.auth
   );
-  console.log(loading)
+  console.log(loading);
 
   useEffect(() => {
     if (!user) {
@@ -27,13 +28,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!isLogined && !user && !loading) {
+    const isAuthPage =
+      location.pathname === Path.login || location.pathname === Path.register;
+
+    if (!isLogined && !user && !loading && !isAuthPage) {
       navigate(Path.login);
     }
-  }, [isLogined, user, loading, navigate]);
+  }, [isLogined, user, loading, navigate, location.pathname]);
 
   if (loading) {
-    console.log(loading)
     return <Loader />;
   }
 

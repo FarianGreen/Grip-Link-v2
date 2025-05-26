@@ -1,0 +1,67 @@
+@import "../../../assets/styles/variables";
+.button {
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  border-radius: $border-radius;
+  transition: $transition;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Variants */
+.primary {
+  background-color: $primary-color;
+  color: white;
+}
+.primary:hover {
+  background-color: darken($primary-color, 10%);
+}
+
+.secondary {
+  background-color: $secondary-color;
+  color: white;
+}
+.secondary:hover {
+  background-color: lighten($secondary-color, 10%);
+}
+
+.danger {
+  background-color: $error-color;
+  color: white;
+}
+.danger:hover {
+  background-color: $error-color;
+}
+
+/* Sizes */
+.sm {
+  font-size: 12px;
+  padding: 0.25rem 0.5rem;
+}
+.md {
+  font-size: 14px;
+  padding: 0.5rem 1rem;
+}
+.lg {
+  font-size: 16px;
+  padding: 0.75rem 1.25rem;
+}
+
+/* Icons */
+.icon {
+  display: inline-flex;
+  margin-right: 0.5rem;
+}
+.iconRight {
+  display: inline-flex;
+  margin-left: 0.5rem;
+}
+
+.disabled {
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
